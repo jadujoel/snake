@@ -1,0 +1,54 @@
+{
+  "name": "snake",
+  "version": "0.0.1",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jadujoel/snake.git"
+  },
+  "keywords": [],
+  "author": "Joel Lof <jlof@evolution.com> (https://joellof.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jadujoel/snake/issues"
+  },
+  "homepage": "https://github.com/jadujoel/snake#readme",
+  "workspaces": [
+    "packages/game",
+    "packages/view"
+  ],
+  "devDependencies": {
+    "@types/glob": "8.0.0",
+    "commitizen": "4.2.5",
+    "conventional-changelog-conventionalcommits": "5.0.0",
+    "cypress": "11.0.1",
+    "cz-conventional-changelog": "3.3.0",
+    "eslint": "8.27.0",
+    "glob": "8.0.3",
+    "husky": "8.0.2",
+    "turbo": "1.6.3",
+    "turborepo": "0.0.1"
+  },
+  "packageManager": "npm@8.0.0",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
+    }
+  },
+  "engines": {
+    "node": "16.11.1"
+  },
+  "scripts": {
+    "version": "utils/sync-version.ts && git add \"*/package.json\"",
+    "postinstall": "husky install",
+    "start": "turbo run start",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint"
+  }
+}
