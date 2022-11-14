@@ -41,11 +41,14 @@
     }
   },
   "engines": {
-    "node": "16.11.1"
+    "node": "16.11.1",
+    "bun": "0.2.2"
   },
   "scripts": {
     "version": "utils/sync-version.ts && git add \"*/package.json\"",
-    "postinstall": "husky install",
+    "postinstall": "bun husky install",
+    "prepare": "cargo install wasm-pack && cargo install wasm-bindgen-cli",
+    "prepare-linux": "sudo apt-get install clang lldb lld llvm cmake pkg-config libssl-dev && rustup component add rls rust-analysis rust-src ",
     "start": "turbo run start",
     "build": "turbo run build",
     "test": "turbo run test",
