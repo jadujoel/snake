@@ -1,0 +1,17 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+yew = "0.19.3"
+wee_alloc = "0.4.5"
+yewtil = "0.4.0"
+gloo = "0.8.0"
+wasm-bindgen = "0.2.83"
+
+
+[lib]
+crate-type = ["rlib", "cdylib"]

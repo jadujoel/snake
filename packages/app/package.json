@@ -1,0 +1,23 @@
+{
+  "name": "app",
+  "version": "0.0.1",
+  "description": "web-worker https://github.com/yewstack/yew/blob/yew-v0.19.3/examples/web_worker_fib/src/agent.rs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf dist pkg",
+    "prebuild": "bun run clean",
+    "build": "bun run build:rust && bun run build:minify && bun run build:copy",
+    "build:rust": "wasm-pack build --target web",
+    "build:minify": "esbuild --bundle src-not-rust/app.ts --outfile=dist/app.js --minify --sourcemap",
+    "build:copy": "cp src-not-rust/index.html dist/index.html && cp pkg/app_bg.wasm dist/app_bg.wasm",
+    "serve": "serve -s dist"
+  },
+  "keywords": [],
+  "author": "Joel Lof <jlof@evolution.com> (https://joellof.com/)",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "0.15.13",
+    "rimraf": "3.0.2",
+    "serve": "14.1.1"
+  }
+}

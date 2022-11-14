@@ -2,12 +2,12 @@ use rand::Rng;
 use std::fmt::Display;
 use wasm_bindgen::prelude::*;
 
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 fn random(min: usize, max: usize) -> usize {
     rand::thread_rng().gen_range(min..max)
 }
-
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[wasm_bindgen]
