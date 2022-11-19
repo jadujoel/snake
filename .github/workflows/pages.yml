@@ -56,7 +56,7 @@ jobs:
           bun-version: 0.2.2
 
       - name: Install
-        run: npm install turbo && bun install
+        run: npm install turbo
 
       - name: Build
         run: bun run build
