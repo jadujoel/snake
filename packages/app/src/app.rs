@@ -8,12 +8,12 @@ use yew_hooks::use_interval;
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let width = 8;
-    let height = 8;
+    let width = 16;
+    let height = 16;
     let size = (width * height) - 1;
     let start_index = random(0, size);
 
-    let fps = 6;
+    let fps = 12;
 
     let world = use_mut_ref(|| World::new(width, height, start_index));
 

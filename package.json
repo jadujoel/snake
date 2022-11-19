@@ -25,7 +25,7 @@
     "eslint": "8.27.0",
     "glob": "8.0.3",
     "husky": "8.0.2",
-    "turbo": "1.6.3",
+    "turbo": "^1.6.3",
     "turborepo": "0.0.1"
   },
   "packageManager": "npm@8.0.0",
