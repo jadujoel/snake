@@ -44,13 +44,19 @@ jobs:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'latest'
 
+      - name: Setup Node
+        uses: actions/setup-node@v3.5.1
+        with:
+          node-version: 16.11.1
+          cache: npm
+
       - name: Setup Bun Runtime
         uses: antongolub/action-setup-bun@v1.12.8
         with:
           bun-version: 0.2.2
 
       - name: Install
-        run: bun install turbo
+        run: npm install turbo && bun install
 
       - name: Build
         run: bun run build
