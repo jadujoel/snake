@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../src-not-rust/app.css"],
-  "sourcesContent": ["html {\n    background-color: rgb(47, 47, 47);\n    color: white;\n}\n\nbutton {\n    background-color: rgb(47, 47, 47);\n    color: white;\n    width: 120px;\n    height: 40px;\n}\n\nbody {\n    background-color: rgb(47, 47, 47);\n\n}\n"],
-  "mappings": "AAAA,KACI,yBACA,WAGJ,OACI,yBACA,WACA,YACA,YAGJ,KACI",
-  "names": []
-}

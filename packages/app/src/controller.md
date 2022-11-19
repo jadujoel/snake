@@ -1,6 +1,7 @@
-import { Direction, GameStatus, type World } from "snake";
+use game::{ Direction, GameStatus, World };
 import { getElementById, unwrap } from "./utils/dom";
 
+```ts
 export const controller = {
     info: getElementById("snake-info"),
     pointsElement: getElementById("snake-score-output"),

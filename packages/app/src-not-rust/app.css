@@ -1,16 +1,38 @@
-html {
-    background-color: rgb(47, 47, 47);
-    color: white;
-}
 
-button {
-    background-color: rgb(47, 47, 47);
+html {
     color: white;
-    width: 120px;
-    height: 40px;
+    padding: 0;
+    margin: 0;
+    background-color: rgb(47, 47, 47);
 }
 
 body {
-    background-color: rgb(47, 47, 47);
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    align-items: center;
+    text-align: center;
+    justify-items: center;
+    background: linear-gradient(45deg, #a14393, #3b20d5);
+}
 
+.game {
+    background: linear-gradient(45deg, #000000c7, #585858);
+    box-shadow: 4px 2px 4px 4px rgba(0, 0, 0, 0.5);
+    border-radius: 16px;
+    padding: 28px;
+    width: 800px;
+    height: 800px;
+}
+
+.game:hover {
+    box-shadow: inset 0 0 0 2px #fff;
+}
+
+.info {
+    color: white;
+    font-size: 3rem;
+    font-weight: 600;
 }

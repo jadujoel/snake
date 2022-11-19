@@ -1,16 +1,10 @@
-use rand::Rng;
 use std::fmt::Display;
-use wasm_bindgen::prelude::*;
+mod snake;
+use snake::{Snake, SnakeCell};
 
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-fn random(min: usize, max: usize) -> usize {
-    rand::thread_rng().gen_range(min..max)
-}
+use crate::utils::random;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-#[wasm_bindgen]
 pub enum Direction {
     Up,
     Down,
@@ -29,51 +23,26 @@ impl Display for Direction {
     }
 }
 
-#[derive(PartialEq, Clone, Copy)]
-struct SnakeCell(usize);
-
-struct Snake {
-    body: Vec<SnakeCell>,
-    direction: Direction,
-}
-
-impl Snake {
-    fn new(spawn_index: usize, size: usize) -> Snake {
-        let mut body = vec![];
-
-        for i in 0..size {
-            body.push(SnakeCell(spawn_index - i));
-        }
-
-        Snake {
-            body,
-            direction: Direction::Right,
-        }
-    }
-}
-
-#[wasm_bindgen]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum GameStatus {
     Paused,
     Won,
     Lost,
-    Played,
+    Running,
 }
 
-#[wasm_bindgen]
+#[derive(Clone, PartialEq)]
 pub struct World {
     width: usize,
     height: usize,
     size: usize,
-    snake: Snake,
+    snake: snake::Snake,
     next_cell: Option<SnakeCell>,
     reward_cell: Option<usize>,
     status: GameStatus,
     points: usize,
 }
 
-#[wasm_bindgen]
 impl World {
     pub fn new(width: usize, height: usize, spawn_index: usize) -> World {
         println!(
@@ -93,12 +62,12 @@ impl World {
             points: 0,
         }
     }
-    pub fn width(&self) -> usize {
-        self.width
-    }
-    pub fn height(&self) -> usize {
-        self.height
-    }
+    // pub fn width(&self) -> usize {
+    //     self.width
+    // }
+    // pub fn height(&self) -> usize {
+    //     self.height
+    // }
     pub fn snake_head_index(&self) -> usize {
         self.snake.body[0].0
     }
@@ -109,7 +78,7 @@ impl World {
 
     pub fn step(&mut self) {
         match self.status {
-            GameStatus::Played => {
+            GameStatus::Running => {
                 let temp = self.snake.body.clone();
                 match self.next_cell {
                     Some(cell) => {
@@ -147,7 +116,7 @@ impl World {
     }
 
     pub fn start_game(&mut self) {
-        self.status = GameStatus::Played;
+        self.status = GameStatus::Running;
     }
 
     pub fn pause_game(&mut self) {
@@ -165,15 +134,15 @@ impl World {
         self.status
     }
 
-    pub fn game_status_text(&self) -> String {
-        match self.status {
-            GameStatus::Won => String::from("You have won!"),
-            GameStatus::Lost => String::from("You have lost!"),
-            GameStatus::Played => String::from("Playing"),
-            GameStatus::Paused => String::from("Paused"),
-            _ => String::from("Unknown State"),
-        }
-    }
+    // pub fn game_status_text(&self) -> String {
+    //     match self.status {
+    //         GameStatus::Won => String::from("You have won!"),
+    //         GameStatus::Lost => String::from("You have lost!"),
+    //         GameStatus::Running => String::from("Playing"),
+    //         GameStatus::Paused => String::from("Paused"),
+    //         _ => String::from("Unknown State"),
+    //     }
+    // }
 
     pub fn set_direction(&mut self, direction: Direction) {
         let next_cell = self.gen_next_snake_cell(&direction);
@@ -228,9 +197,9 @@ impl World {
             }
         };
     }
-    pub fn snake_body_len(&self) -> usize {
-        self.snake.body.len()
-    }
+    // pub fn snake_body_len(&self) -> usize {
+    //     self.snake.body.len()
+    // }
 
     fn gen_reward_cell(max: usize, snake_body: &Vec<SnakeCell>) -> Option<usize> {
         let mut reward_cell;
@@ -248,8 +217,8 @@ impl World {
 #[test]
 fn test_world() {
     let world = World::new(8, 8, 10);
-    assert_eq!(world.width(), 8);
-    assert_eq!(world.height(), 8);
+    // assert_eq!(world.width(), 8);
+    // assert_eq!(world.height(), 8);
     assert_eq!(world.snake_head_index(), 10);
 }
 
@@ -273,19 +242,19 @@ fn test_gen_next_snake_cell() {
 fn test_set_direction() {
     let mut world = World::new(8, 8, 10);
 
-    world.set_direction(Direction::Right);
-    assert_eq!(world.snake.direction, Direction::Right);
-    assert_eq!(world.next_cell.as_ref().unwrap().0, 11);
-
-    world.set_direction(Direction::Left);
-    assert_eq!(world.snake.direction, Direction::Left);
-    assert_eq!(world.next_cell.as_ref().unwrap().0, 9);
-
     world.set_direction(Direction::Up);
     assert_eq!(world.snake.direction, Direction::Up);
     assert_eq!(world.next_cell.as_ref().unwrap().0, 2);
 
+    world.set_direction(Direction::Right);
+    assert_eq!(world.snake.direction, Direction::Right);
+    assert_eq!(world.next_cell.as_ref().unwrap().0, 11);
+
     world.set_direction(Direction::Down);
     assert_eq!(world.snake.direction, Direction::Down);
     assert_eq!(world.next_cell.as_ref().unwrap().0, 18);
+
+    world.set_direction(Direction::Left);
+    assert_eq!(world.snake.direction, Direction::Left);
+    assert_eq!(world.next_cell.as_ref().unwrap().0, 9);
 }
