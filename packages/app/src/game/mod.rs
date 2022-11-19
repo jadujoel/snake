@@ -62,12 +62,7 @@ impl World {
             points: 0,
         }
     }
-    // pub fn width(&self) -> usize {
-    //     self.width
-    // }
-    // pub fn height(&self) -> usize {
-    //     self.height
-    // }
+
     pub fn snake_head_index(&self) -> usize {
         self.snake.body[0].0
     }
@@ -134,16 +129,6 @@ impl World {
         self.status
     }
 
-    // pub fn game_status_text(&self) -> String {
-    //     match self.status {
-    //         GameStatus::Won => String::from("You have won!"),
-    //         GameStatus::Lost => String::from("You have lost!"),
-    //         GameStatus::Running => String::from("Playing"),
-    //         GameStatus::Paused => String::from("Paused"),
-    //         _ => String::from("Unknown State"),
-    //     }
-    // }
-
     pub fn set_direction(&mut self, direction: Direction) {
         let next_cell = self.gen_next_snake_cell(&direction);
         if self.snake.body[1] == next_cell {
@@ -197,9 +182,6 @@ impl World {
             }
         };
     }
-    // pub fn snake_body_len(&self) -> usize {
-    //     self.snake.body.len()
-    // }
 
     fn gen_reward_cell(max: usize, snake_body: &Vec<SnakeCell>) -> Option<usize> {
         let mut reward_cell;
@@ -217,8 +199,6 @@ impl World {
 #[test]
 fn test_world() {
     let world = World::new(8, 8, 10);
-    // assert_eq!(world.width(), 8);
-    // assert_eq!(world.height(), 8);
     assert_eq!(world.snake_head_index(), 10);
 }
 

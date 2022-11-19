@@ -1,3 +1,6 @@
+web-worker: https://github.com/yewstack/yew/blob/yew-v0.19.3/examples/web_worker_fib/src/agent.rs
+
+
 ```rust
 use crate::{JsValue, ui};
 use crate::{game::World, utils::random};

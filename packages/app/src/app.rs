@@ -1,10 +1,9 @@
 use crate::board::SnakeCanvas;
-use crate::game::{Direction, GameStatus};
-use crate::{game::World, utils::random};
-use gloo::events::EventListener;
-use wasm_bindgen::JsCast;
-use yew::prelude::*;
-use yew_hooks::use_interval;
+use crate::game::{Direction, GameStatus, World};
+use crate::utils::random;
+use web_sys::KeyboardEvent;
+use yew::{function_component, html, use_mut_ref, use_state};
+use yew_hooks::{use_event_with_window, use_interval};
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -21,6 +20,26 @@ pub fn app() -> Html {
     let reward = use_state(|| world.borrow().reward_cell());
     let status = use_state(|| world.borrow().game_status());
     let body = use_state(|| world.borrow().snake_body());
+
+    {
+        let world = world.clone();
+        use_event_with_window("keydown", move |event: KeyboardEvent| {
+            let mut world = world.borrow_mut();
+            match event.key().as_str() {
+                "ArrowUp" => world.set_direction(Direction::Up),
+                "ArrowDown" => world.set_direction(Direction::Down),
+                "ArrowLeft" => world.set_direction(Direction::Left),
+                "ArrowRight" => world.set_direction(Direction::Right),
+                " " => match world.game_status() {
+                    GameStatus::Paused => world.start_game(),
+                    GameStatus::Running => world.pause_game(),
+                    GameStatus::Won => world.restart(),
+                    GameStatus::Lost => world.restart(),
+                },
+                _ => {}
+            }
+        });
+    }
 
     // update the game each interval
     {
@@ -42,54 +61,6 @@ pub fn app() -> Html {
             },
             *millis,
         );
-    }
-
-    // controller
-    {
-        let world = world.clone();
-        use_effect(move || {
-            // Attach a keydown event listener to the document.
-            let document = gloo::utils::document();
-            let listener = EventListener::new(&document, "keydown", move |event| {
-                let event = match event.dyn_ref::<web_sys::KeyboardEvent>() {
-                    Some(event) => event,
-                    None => return,
-                };
-                let mut world = world.borrow_mut();
-                match event.key().as_str() {
-                    "ArrowUp" => {
-                        world.set_direction(Direction::Up);
-                    }
-                    "ArrowDown" => {
-                        world.set_direction(Direction::Down);
-                    }
-                    "ArrowLeft" => {
-                        world.set_direction(Direction::Left);
-                    }
-                    "ArrowRight" => {
-                        world.set_direction(Direction::Right);
-                    }
-                    " " => match world.game_status() {
-                        GameStatus::Paused => {
-                            world.start_game();
-                        }
-                        GameStatus::Running => {
-                            world.pause_game();
-                        }
-                        GameStatus::Won => {
-                            world.restart();
-                        }
-                        GameStatus::Lost => {
-                            world.restart();
-                        }
-                    },
-                    _ => {}
-                };
-            });
-            // Called when the component is unmounted.  The closure has to hold on to `listener`, because if it gets
-            // dropped, `gloo` detaches it from the DOM. So it's important to do _something_, even if it's just dropping it.
-            || drop(listener)
-        });
     }
 
     html! (

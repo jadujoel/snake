@@ -7,13 +7,13 @@ edition = "2021"
 
 [dependencies]
 yew = "0.19.3"
+yew-hooks = "0.1.56" # use interval
 wee_alloc = "0.4.5"
-yewtil = "0.4.0"
 gloo = "0.8.0"
 wasm-bindgen = "0.2.83"
 rand = "0.8.5"
 getrandom = { version = "0.2.8", features = ["js"] }
-yew-hooks = "0.1.56"
+# yewtil = "0.4.0"
 
 [lib]
 crate-type = ["rlib", "cdylib"]
@@ -22,8 +22,9 @@ crate-type = ["rlib", "cdylib"]
 version = "0.3.60"
 features = [
   'CanvasRenderingContext2d',
-  'Document',
-  'Element',
   'HtmlCanvasElement',
-  'Window',
+  'KeyboardEvent'
 ]
+
+[profile.release]
+lto = true

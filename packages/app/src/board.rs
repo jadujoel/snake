@@ -1,6 +1,6 @@
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlCanvasElement;
-use yew::prelude::*;
+use yew::{function_component, html, use_node_ref, use_state, Properties};
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
@@ -96,16 +96,11 @@ pub fn gui(props: &Props) -> Html {
             .unwrap()
             .dyn_into::<web_sys::CanvasRenderingContext2d>()
             .unwrap();
-            
+
         draw_board(&context, width.clone(), height.clone(), *cell_size);
         match reward {
             Some(reward) => {
-                draw_reward(
-                    &context,
-                    width.clone(),
-                    *cell_size,
-                    reward as u32,
-                );
+                draw_reward(&context, width.clone(), *cell_size, reward as u32);
             }
             None => {}
         }
