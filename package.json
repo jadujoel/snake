@@ -14,15 +14,14 @@
   },
   "homepage": "https://github.com/jadujoel/snake#readme",
   "workspaces": [
-    "packages/game",
-    "packages/view"
+    "packages/app"
   ],
   "devDependencies": {
     "@types/glob": "8.0.0",
     "commitizen": "4.2.5",
     "conventional-changelog-conventionalcommits": "5.0.0",
-    "cypress": "11.0.1",
     "cz-conventional-changelog": "3.3.0",
+    "cypress": "11.0.1",
     "eslint": "8.27.0",
     "glob": "8.0.3",
     "husky": "8.0.2",
@@ -49,7 +48,7 @@
     "postinstall": "bun husky install && cd packages/view && bun install && cd ../app && bun install && cd ../game && bun install",
     "prepare-rust": "cargo install wasm-pack || cargo install wasm-bindgen-cli || true",
     "prepare-linux": "sudo apt-get install clang lldb lld llvm cmake pkg-config libssl-dev && rustup component add rls rust-analysis rust-src ",
-    "start": "turbo run start",
+    "serve": "turbo run serve",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint"

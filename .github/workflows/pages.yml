@@ -62,7 +62,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1.0.4
         with:
-          path: 'packages/view/dist'
+          path: 'packages/app/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
