@@ -61,6 +61,7 @@ impl World {
     pub fn step(&mut self) {
         match self.status {
             GameStatus::Running => {
+
                 let temp = self.snake.body.clone();
                 match self.next_cell {
                     Some(cell) => {
@@ -69,9 +70,10 @@ impl World {
                     }
                     None => {
                         self.snake.body[0] = self.gen_next_snake_cell(&self.snake.direction);
-                        self.audio_system.trigger("step", Some(self.snake.body[0].0 as f32));
                     }
                 }
+                self.audio_system.trigger("step", Some(self.snake.body[0].0 as f32));
+
                 let len = self.snake.body.len();
 
                 for i in 1..len {
@@ -79,6 +81,7 @@ impl World {
                 }
 
                 if self.snake.body[1..len].contains(&self.snake.body[0]) {
+                    self.audio_system.trigger("lose", None);
                     self.status = GameStatus::Lost
                 }
 
@@ -86,7 +89,7 @@ impl World {
                     if len < self.size {
                         self.points += 1;
                         self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
-                        self.audio_system.trigger("eat", None);
+                        self.audio_system.trigger("eat", Some(self.snake_body().len() as f32));
 
                     } else {
                         self.reward_cell = None;
@@ -102,14 +105,22 @@ impl World {
     }
 
     pub fn start_game(&mut self) {
+        self.audio_system.trigger("start", None);
+        self.status = GameStatus::Running;
+    }
+
+    pub fn resume_game(&mut self) {
+        self.audio_system.trigger("resume", None);
         self.status = GameStatus::Running;
     }
 
     pub fn pause_game(&mut self) {
+        self.audio_system.trigger("pause", None);
         self.status = GameStatus::Paused;
     }
 
     pub fn restart(&mut self) {
+        self.audio_system.trigger("restart", None);
         self.snake = Snake::new(self.snake_head_index(), 3);
         self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
         self.status = GameStatus::Paused;
@@ -121,6 +132,10 @@ impl World {
     }
 
     pub fn set_direction(&mut self, direction: Direction) {
+        if direction == self.snake.direction {
+            return;
+        }
+        self.audio_system.trigger("direction", Some(direction as u8 as f32));
         let next_cell = self.gen_next_snake_cell(&direction);
         if self.snake.body[1] == next_cell {
             return;
