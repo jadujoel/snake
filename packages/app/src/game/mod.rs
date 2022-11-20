@@ -69,7 +69,7 @@ impl World {
                     }
                     None => {
                         self.snake.body[0] = self.gen_next_snake_cell(&self.snake.direction);
-                        self.audio_system.trigger("step");
+                        self.audio_system.trigger("step", Some(self.snake.body[0].0 as f32));
                     }
                 }
                 let len = self.snake.body.len();
@@ -86,12 +86,12 @@ impl World {
                     if len < self.size {
                         self.points += 1;
                         self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
-                        self.audio_system.trigger("eat");
+                        self.audio_system.trigger("eat", None);
 
                     } else {
                         self.reward_cell = None;
                         self.status = GameStatus::Won;
-                        self.audio_system.trigger("win");
+                        self.audio_system.trigger("win", None);
                     }
 
                     self.snake.body.push(SnakeCell(self.snake.body[1].0));

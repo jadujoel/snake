@@ -1,10 +1,12 @@
-use std::{cell::RefCell, rc::Rc};
+use gloo::console;
+use web_sys::AudioContext;
+mod note;
+use note::{note_to_frequency, Note};
 
-use gloo::{console, events::EventListener};
-use wasm_bindgen::JsCast;
-use web_sys::{AudioContext, KeyboardEvent};
-
-use crate::utils::{clamp, random};
+use crate::{
+    audio::note::CMAJOR_SCALE,
+    utils::{clamp, random},
+};
 
 fn linear_from_decibel(decibel: f32) -> f32 {
     10.0_f32.powf(decibel / 20.0)
@@ -50,6 +52,32 @@ pub fn play_oscillator(context: &AudioContext, frequency: f32, gain: f32) {
         .connect_with_audio_node(&context.destination());
 }
 
+pub fn play_step(context: &AudioContext, frequency: f32, gain: f32) {
+    let now = context.current_time();
+    let oscillator = context.create_oscillator().unwrap();
+    oscillator.set_type(web_sys::OscillatorType::Sawtooth);
+    oscillator
+        .frequency()
+        .set_value(clamp(10.0, frequency, 20000.0));
+    oscillator.start().unwrap();
+    oscillator.stop_with_when(now + 0.4);
+    oscillator.frequency().set_value_curve_at_time(
+        &mut [frequency + random(0, 20) as f32, frequency / 2.0 as f32],
+        now,
+        0.1,
+    );
+
+    let gainNode = context.create_gain().unwrap();
+    gainNode.gain().set_value(linear_from_decibel(gain));
+    gainNode
+        .gain()
+        .exponential_ramp_to_value_at_time(0.01, now + 0.1);
+    oscillator
+        .connect_with_audio_node(&gainNode)
+        .unwrap()
+        .connect_with_audio_node(&context.destination());
+}
+
 #[derive(Clone, PartialEq)]
 struct AudioEngine {
     context: AudioContext,
@@ -60,13 +88,27 @@ impl AudioEngine {
         Self { context }
     }
 
-    pub fn trigger(&self, event: &str) {
-        console::log!("[audio] event", event);
+    pub fn trigger(&self, event: &str, val: Option<f32>) {
+        console::log!("[audio] event", event, val);
 
         match event {
             "eat" => self.play_sound(440.0, -18.0),
             "die" => self.play_sound(220.0, -18.0),
-            "step" => self.play_sound(40.0, -80.0),
+            "step" => play_step(
+                &self.context,
+                match val {
+                    Some(val) => {
+                        let min = 24;
+                        let max = 56;
+                        let note = CMAJOR_SCALE[val as usize % CMAJOR_SCALE.len()] % Note::C4 + Note::C3;
+                        let frequency = note_to_frequency(note);
+                        console::log!("note", note.to_string());
+                        frequency
+                    }
+                    None => 440.0,
+                },
+                -96.0,
+            ),
             _ => {}
         }
     }
@@ -84,30 +126,10 @@ pub struct AudioEngineProvider {
 
 impl AudioEngineProvider {
     pub fn new() -> Self {
-        // let me = Rc::new(Self {
-        //     audio_engine: None,
-        //     is_enabled: false,
-        // });
-
-        let me = Rc::new(RefCell::new(Self {
+        Self {
             audio_engine: None,
             is_enabled: false,
-        }));
-
-        let window = web_sys::window().expect("global window does not exists");
-
-        // {
-        //     let me = me.clone();
-        //     let on_keydown = EventListener::new(&window, "keydown", move |event| {
-        //         // let keyboard_event = event.clone().dyn_into::<KeyboardEvent>().unwrap();
-        //         if !me.borrow().is_enabled {
-        //             me.borrow_mut().start();
-        //             me.borrow_mut().is_enabled = true;
-        //         }
-        //     });
-        //     on_keydown.forget();
-        // }
-        return (*me).borrow_mut().clone();
+        }
     }
 
     // use this on user action to create the audio context
@@ -120,10 +142,10 @@ impl AudioEngineProvider {
         self.is_enabled = true;
     }
 
-    pub fn trigger(&self, event: &str) {
+    pub fn trigger(&self, event: &str, val: Option<f32>) {
         if self.is_enabled {
             match &self.audio_engine {
-                Some(audio_engine) => audio_engine.trigger(event),
+                Some(audio_engine) => audio_engine.trigger(event, val),
                 None => {}
             }
         }

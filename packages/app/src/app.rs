@@ -8,16 +8,19 @@ use yew_hooks::{use_event_with_window, use_interval};
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let width = 16;
-    let height = 16;
+
+    let width = 8;
+    let height = 8;
     let size = (width * height) - 1;
     let start_index = random(0, size);
 
-    let fps = 12;
+    let bpm = 128;
+    let division = 2;
+    let seconds = 60.0 / bpm as f32 / division as f32;
 
     let world = use_mut_ref(|| World::new(width, height, start_index));
 
-    let millis = use_state(|| 1000 / fps);
+    let millis = use_state(|| (seconds * 1000.0) as u32);
     let reward = use_state(|| world.borrow().reward_cell());
     let status = use_state(|| world.borrow().game_status());
     let body = use_state(|| world.borrow().snake_body());
@@ -48,7 +51,6 @@ pub fn app() -> Html {
         let reward = reward.clone();
         let world = world.clone();
         let status = status.clone();
-
         use_interval(
             move || {
                 let mut world = world.borrow_mut();
