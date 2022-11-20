@@ -23,7 +23,14 @@ version = "0.3.60"
 features = [
   'CanvasRenderingContext2d',
   'HtmlCanvasElement',
-  'KeyboardEvent'
+  'KeyboardEvent',
+  'AudioContext',
+  'AudioDestinationNode',
+  'AudioNode',
+  'AudioParam',
+  'GainNode',
+  'OscillatorNode',
+  'OscillatorType'
 ]
 
 [profile.release]

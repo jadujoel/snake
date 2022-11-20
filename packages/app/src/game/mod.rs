@@ -1,8 +1,6 @@
-use std::fmt::Display;
 mod snake;
 use snake::{Snake, SnakeCell};
-
-use crate::utils::random;
+use crate::{utils::random, audio};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Direction {
@@ -10,17 +8,6 @@ pub enum Direction {
     Down,
     Left,
     Right,
-}
-
-impl Display for Direction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Direction::Up => write!(f, "Up"),
-            Direction::Down => write!(f, "Down"),
-            Direction::Left => write!(f, "Left"),
-            Direction::Right => write!(f, "Right"),
-        }
-    }
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -41,16 +28,15 @@ pub struct World {
     reward_cell: Option<usize>,
     status: GameStatus,
     points: usize,
+    audio_system: audio::AudioEngineProvider,
 }
 
 impl World {
     pub fn new(width: usize, height: usize, spawn_index: usize) -> World {
-        println!(
-            "Creating a new world with width: {}, height: {}, spawn_index: {}",
-            width, height, spawn_index
-        );
         let size = width * height;
         let snake = Snake::new(spawn_index, 3);
+        let mut audio_system = audio::AudioEngineProvider::new();
+        audio_system.start();
         World {
             width,
             height,
@@ -60,6 +46,7 @@ impl World {
             next_cell: None,
             status: GameStatus::Paused,
             points: 0,
+            audio_system,
         }
     }
 
@@ -82,6 +69,7 @@ impl World {
                     }
                     None => {
                         self.snake.body[0] = self.gen_next_snake_cell(&self.snake.direction);
+                        self.audio_system.trigger("step");
                     }
                 }
                 let len = self.snake.body.len();
@@ -98,9 +86,12 @@ impl World {
                     if len < self.size {
                         self.points += 1;
                         self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
+                        self.audio_system.trigger("eat");
+
                     } else {
                         self.reward_cell = None;
-                        self.status = GameStatus::Won
+                        self.status = GameStatus::Won;
+                        self.audio_system.trigger("win");
                     }
 
                     self.snake.body.push(SnakeCell(self.snake.body[1].0));
