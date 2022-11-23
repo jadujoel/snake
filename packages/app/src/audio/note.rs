@@ -2,6 +2,8 @@ use std::ops::Add;
 use std::ops::Sub;
 
 #[derive(Clone, Copy)]
+#[allow(dead_code, unused_variables, unused_assignments)]
+
 pub enum Note {
     C0,
     C0Sharp,
@@ -267,7 +269,8 @@ impl ToString for Note {
     }
 }
 
-pub static NOTES: [Note; 108] = [
+#[allow(dead_code, unused_variables, unused_assignments)]
+pub const NOTES: [Note; 108] = [
     Note::C0,
     Note::C0Sharp,
     Note::D0,
@@ -280,7 +283,6 @@ pub static NOTES: [Note; 108] = [
     Note::A0,
     Note::A0Sharp,
     Note::B0,
-
     Note::C1,
     Note::C1Sharp,
     Note::D1,
@@ -293,7 +295,6 @@ pub static NOTES: [Note; 108] = [
     Note::A1,
     Note::A1Sharp,
     Note::B1,
-
     Note::C2,
     Note::C2Sharp,
     Note::D2,
@@ -306,7 +307,6 @@ pub static NOTES: [Note; 108] = [
     Note::A2,
     Note::A2Sharp,
     Note::B2,
-
     Note::C3,
     Note::C3Sharp,
     Note::D3,
@@ -319,7 +319,6 @@ pub static NOTES: [Note; 108] = [
     Note::A3,
     Note::A3Sharp,
     Note::B3,
-
     Note::C4,
     Note::C4Sharp,
     Note::D4,
@@ -332,7 +331,6 @@ pub static NOTES: [Note; 108] = [
     Note::A4,
     Note::A4Sharp,
     Note::B4,
-
     Note::C5,
     Note::C5Sharp,
     Note::D5,
@@ -383,7 +381,7 @@ pub static NOTES: [Note; 108] = [
     Note::B8,
 ];
 
-pub static FREQUENCIES: [f32; 108] = [
+pub const FREQUENCIES: [f32; 108] = [
     16.35, 17.32, 18.35, 19.45, 20.60, 21.83, 23.12, 24.50, 25.96, 27.50, 29.14, 30.87, 32.70,
     34.65, 36.71, 38.89, 41.20, 43.65, 46.25, 49.00, 51.91, 55.00, 58.27, 61.74, 65.41, 69.30,
     73.42, 77.78, 82.41, 87.31, 92.50, 98.00, 103.83, 110.00, 116.54, 123.47, 130.81, 138.59,
@@ -397,7 +395,7 @@ pub static FREQUENCIES: [f32; 108] = [
 ];
 
 // CMajor scale
-pub static CMAJOR_SCALE: [Note; 63] = [
+pub const CMAJOR_SCALE: [Note; 63] = [
     Note::C0,
     Note::D0,
     Note::E0,
@@ -405,7 +403,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::G0,
     Note::A0,
     Note::B0,
-
     Note::C1,
     Note::D1,
     Note::E1,
@@ -413,7 +410,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::G1,
     Note::A1,
     Note::B1,
-
     Note::C2,
     Note::D2,
     Note::E2,
@@ -421,7 +417,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::G2,
     Note::A2,
     Note::B2,
-
     Note::C3,
     Note::D3,
     Note::E3,
@@ -429,7 +424,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::G3,
     Note::A3,
     Note::B3,
-
     Note::C4,
     Note::D4,
     Note::E4,
@@ -437,7 +431,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::G4,
     Note::A4,
     Note::B4,
-
     Note::C5,
     Note::D5,
     Note::E5,
@@ -445,7 +438,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::G5,
     Note::A5,
     Note::B5,
-
     Note::C6,
     Note::D6,
     Note::E6,
@@ -453,7 +445,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::G6,
     Note::A6,
     Note::B6,
-
     Note::C7,
     Note::D7,
     Note::E7,
@@ -461,7 +452,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::G7,
     Note::A7,
     Note::B7,
-
     Note::C8,
     Note::D8,
     Note::E8,
@@ -470,85 +460,6 @@ pub static CMAJOR_SCALE: [Note; 63] = [
     Note::A8,
     Note::B8,
 ];
-
-// pub fn frequency_to_note(frequency: f32) -> Note {
-//     match frequency {
-//         16.35 => Note::C0,
-//         17.32 => Note::C0Sharp,
-//         18.35 => Note::D0,
-//         19.45 => Note::D0Sharp,
-//         20.60 => Note::E0,
-//         21.83 => Note::F0,
-//         23.12 => Note::F0Sharp,
-//         24.50 => Note::G0,
-//         25.96 => Note::G0Sharp,
-//         27.50 => Note::A0,
-//         29.14 => Note::A0Sharp,
-//         30.87 => Note::B0,
-//         32.70 => Note::C1,
-//         34.65 => Note::C1Sharp,
-//         36.71 => Note::D1,
-//         38.89 => Note::D1Sharp,
-//         41.20 => Note::E1,
-//         43.65 => Note::F1,
-//         46.25 => Note::F1Sharp,
-//         49.00 => Note::G1,
-//         51.91 => Note::G1Sharp,
-//         55.00 => Note::A1,
-//         58.27 => Note::A1Sharp,
-//         61.74 => Note::B1,
-//         65.41 => Note::C2,
-//         69.30 => Note::C2Sharp,
-//         73.42 => Note::D2,
-//         77.78 => Note::D2Sharp,
-//         82.41 => Note::E2,
-//         87.31 => Note::F2,
-//         92.50 => Note::F2Sharp,
-//         98.00 => Note::G2,
-//         103.83 => Note::G2Sharp,
-//         110.00 => Note::A2,
-//         116.54 => Note::A2Sharp,
-//         123.47 => Note::B2,
-//         130.81 => Note::C3,
-//         138.59 => Note::C3Sharp,
-//         146.83 => Note::D3,
-//         155.56 => Note::D3Sharp,
-//         164.81 => Note::E3,
-//         174.61 => Note::F3,
-//         185.00 => Note::F3Sharp,
-//         196.00 => Note::G3,
-//         207.65 => Note::G3Sharp,
-//         220.00 => Note::A3,
-//         233.08 => Note::A3Sharp,
-//         246.94 => Note::B3,
-//         261.63 => Note::C4,
-//         277.18 => Note::C4Sharp,
-//         293.66 => Note::D4,
-//         311.13 => Note::D4Sharp,
-//         329.63 => Note::E4,
-//         349.23 => Note::F4,
-//         369.99 => Note::F4Sharp,
-//         392.00 => Note::G4,
-//         415.30 => Note::G4Sharp,
-//         440.00 => Note::A4,
-//         466.16 => Note::A4Sharp,
-//         493.88 => Note::B4,
-//         523.25 => Note::C5,
-//         554.37 => Note::C5Sharp,
-//         587.33 => Note::D5,
-//         622.25 => Note::D5Sharp,
-//         659.25 => Note::E5,
-//         698.46 => Note::F5,
-//         739.99 => Note::F5Sharp,
-//         783.99 => Note::G5,
-//         830.61 => Note::G5Sharp,
-//         880.00 => Note::A5,
-//         932.33 => Note::A5Sharp,
-//         987.77 => Note::B5,
-//         1046.50 => Note::C6,
-//         _ => Note::C0,
-//     }
-// }
 
 pub fn note_to_frequency(note: Note) -> f32 {
     FREQUENCIES[note as usize]

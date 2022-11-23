@@ -1,6 +1,7 @@
 mod snake;
+use gloo::console;
 use snake::{Snake, SnakeCell};
-use crate::{utils::random, audio};
+use crate::{utils::random, audio::{provider::AudioEngineProvider}};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Direction {
@@ -18,28 +19,25 @@ pub enum GameStatus {
     Running,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct World {
     width: usize,
-    height: usize,
     size: usize,
     snake: snake::Snake,
     next_cell: Option<SnakeCell>,
     reward_cell: Option<usize>,
     status: GameStatus,
     points: usize,
-    audio_system: audio::AudioEngineProvider,
+    audio_system: AudioEngineProvider,
 }
 
 impl World {
     pub fn new(width: usize, height: usize, spawn_index: usize) -> World {
         let size = width * height;
         let snake = Snake::new(spawn_index, 3);
-        let mut audio_system = audio::AudioEngineProvider::new();
-        audio_system.start();
+        let audio_system = AudioEngineProvider::new();
         World {
             width,
-            height,
             size,
             reward_cell: World::gen_reward_cell(size, &snake.body),
             snake,
@@ -48,6 +46,11 @@ impl World {
             points: 0,
             audio_system,
         }
+    }
+
+    pub fn start_audio(&mut self) {
+        console::log!("[audio] start");
+        self.audio_system.start();
     }
 
     pub fn snake_head_index(&self) -> usize {
@@ -105,6 +108,7 @@ impl World {
     }
 
     pub fn start_game(&mut self) {
+        self.start_audio();
         self.audio_system.trigger("start", None);
         self.status = GameStatus::Running;
     }

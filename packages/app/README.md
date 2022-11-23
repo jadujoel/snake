@@ -1,7 +1,74 @@
 web-worker: https://github.com/yewstack/yew/blob/yew-v0.19.3/examples/web_worker_fib/src/agent.rs
 
+build gui using webgl: https://www.egui.rs/
+openAL audio:
+
+embedd raw data: https://nickb.dev/blog/a-quick-tour-of-trade-offs-embedding-data-in-rust/
+
+go from typescript to rust:
+* https://github.com/dlunch/typescript-wasm-bindgen
+* https://rustwasm.github.io/wasm-bindgen/reference/attributes/on-rust-exports/typescript_type.html
+
+create a vector of pointers
+create a vector of isLoaded boolean
+
 
 ```rust
+#[tokio::main]
+async fn main() {
+    let fut = MyFuture::new();
+    println!("Awaiting fut...");
+    fut.await;
+    println!("Awaiting fut... done!");
+}
+
+struct MyFuture {
+    slept: bool,
+}
+
+impl MyFuture {
+    fn new() -> Self {
+        Self { slept: false }
+    }
+}
+
+impl Future for MyFuture {
+    type Output = ();
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        println!("MyFuture::poll()");
+
+        match self.slept {
+            false => {
+                // make sure we're polled again in one second
+                let waker = cx.waker().clone();
+                std::thread::spawn(move || {
+                    std::thread::sleep(Duration::from_secs(1));
+                    waker.wake();
+                });
+                self.slept = true;
+
+                Poll::Pending
+            }
+            true => Poll::Ready(()),
+        }
+    }
+}
+
+
+#[pin_project::pin_project] // This generates a `project` method
+pub struct TimedWrapper<Fut: Future> {
+	// For each field, we need to choose whether `project` returns an
+	// unpinned (&mut T) or pinned (Pin<&mut T>) reference to the field.
+	// By default, it assumes unpinned:
+	start: Option<Instant>,
+	// Opt into pinned references with this attribute:
+	#[pin]
+	future: Fut,
+}
+
+
+
 use crate::{JsValue, ui};
 use crate::{game::World, utils::random};
 use gloo::console;

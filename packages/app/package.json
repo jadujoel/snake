@@ -9,7 +9,7 @@
     "build": "bun run build:rust && bun run build:minify && bun run build:copy",
     "build:rust": "wasm-pack build --target web",
     "build:minify": "esbuild --bundle src-not-rust/app.ts --outfile=dist/app.js --minify --sourcemap",
-    "build:copy": "cp src-not-rust/index.html dist/index.html && cp pkg/app_bg.wasm dist/app_bg.wasm",
+    "build:copy": "cp src-not-rust/index.html dist/index.html && cp pkg/app_bg.wasm dist/app_bg.wasm && cp -R src-not-rust/audio dist/audio",
     "optimize:size": "wasm-opt -Os -o pkg/app_bg_optimized.wasm pkg/app_bg.wasm",
     "optimize:size:aggressive": "wasm-opt -Oz -o pkg/app_bg_optimized.wasm pkg/app_bg.wasm",
     "optimize:speed": "wasm-opt -O -o pkg/app_bg_optimized.wasm pkg/app_bg.wasm",
@@ -22,6 +22,9 @@
   "devDependencies": {
     "esbuild": "0.15.13",
     "rimraf": "3.0.2",
-    "serve": "14.1.1"
+    "serve": "14.1.2",
+    "typescript": "4.9.3"
+  },
+  "dependencies": {
   }
 }

@@ -2,7 +2,7 @@ use crate::board::SnakeCanvas;
 use crate::game::{Direction, GameStatus, World};
 use crate::utils::random;
 
-use web_sys::KeyboardEvent;
+use web_sys::{KeyboardEvent, TouchEvent};
 use yew::{function_component, html, use_mut_ref, use_state};
 use yew_hooks::{use_event_with_window, use_interval};
 
@@ -41,6 +41,18 @@ pub fn app() -> Html {
                     GameStatus::Lost => world.restart(),
                 },
                 _ => {}
+            }
+        });
+    }
+    {
+        let world = world.clone();
+        use_event_with_window("touchstart", move |_: TouchEvent| {
+            let mut world = world.borrow_mut();
+            match world.game_status() {
+                GameStatus::Paused => world.start_game(),
+                GameStatus::Running => world.pause_game(),
+                GameStatus::Won => world.restart(),
+                GameStatus::Lost => world.restart(),
             }
         });
     }
