@@ -10,7 +10,7 @@ use web_sys::{Request, RequestInit, RequestMode, Response};
 
 const NUM_ASSETS: usize = 1;
 // const NAMES: [&str; NUM_ASSETS] = ["music"];
-const URLS: [&str; NUM_ASSETS] = ["audio/music-a-115bpm.wav"];
+const URLS: [&str; NUM_ASSETS] = ["audio/music-a-115bpm.webm"];
 static mut BUFFERS: [Option<AudioBuffer>; NUM_ASSETS] = [None];
 
 pub async fn fetch_array_buffer(url: &str) -> ArrayBuffer {

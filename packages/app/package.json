@@ -9,12 +9,13 @@
     "build": "bun run build:rust && bun run build:minify && bun run build:copy",
     "build:rust": "wasm-pack build --target web",
     "build:minify": "esbuild --bundle src-not-rust/app.ts --outfile=dist/app.js --minify --sourcemap",
-    "build:copy": "cp src-not-rust/index.html dist/index.html && cp pkg/app_bg.wasm dist/app_bg.wasm && cp -R src-not-rust/audio dist/audio",
+    "build:copy": "cp src-not-rust/index.html dist/index.html && cp pkg/app_bg.wasm dist/app_bg.wasm",
     "optimize:size": "wasm-opt -Os -o pkg/app_bg_optimized.wasm pkg/app_bg.wasm",
     "optimize:size:aggressive": "wasm-opt -Oz -o pkg/app_bg_optimized.wasm pkg/app_bg.wasm",
     "optimize:speed": "wasm-opt -O -o pkg/app_bg_optimized.wasm pkg/app_bg.wasm",
     "optimize:speed:aggressive": "wasm-opt -O3 -o pkg/app_bg_optimized.wasm pkg/app_bg.wasm",
-    "serve": "serve -s dist"
+    "serve": "serve -s dist",
+    "encode": "cargo run --package encoder --release -- -i audio -o dist/audio -b 96k"
   },
   "keywords": [],
   "author": "Joel Lof <jlof@evolution.com> (https://joellof.com/)",

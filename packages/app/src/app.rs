@@ -2,7 +2,7 @@ use crate::board::SnakeCanvas;
 use crate::game::{Direction, GameStatus, World};
 use crate::utils::random;
 
-use web_sys::{KeyboardEvent, TouchEvent};
+use web_sys::{KeyboardEvent};
 use yew::{function_component, html, use_mut_ref, use_state};
 use yew_hooks::{use_event_with_window, use_interval};
 

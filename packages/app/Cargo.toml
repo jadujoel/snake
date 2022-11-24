@@ -19,6 +19,7 @@ js-sys = "0.3.60"
 # futures = "0.3.25"
 # async_runtime = { version = "^0.3", default-features = false, package = "naja_async_runtime" }
 # pin-project = "1.0.12"
+encoder = { path = "../encoder" }
 
 [lib]
 crate-type = ["rlib", "cdylib"]

@@ -1,0 +1,27 @@
+{
+  "name": "encoder",
+  "version": "0.0.1",
+  "description": "A simple audio encoder",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cargo build --release",
+    "encode": "cargo run --release --bin encoder -- -i audio-sources -o audio-encoded",
+    "dev": "bun run build && bun run encode"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jadujoel/encoder.git"
+  },
+  "keywords": [],
+  "author": "Joel Lof <jlof@evolution.com> (https://joellof.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jadujoel/encoder/issues"
+  },
+  "homepage": "https://github.com/jadujoel/encoder#readme",
+  "devDependencies": {
+    "mkdirp": "1.0.4",
+    "rimraf": "3.0.2"
+  }
+}
