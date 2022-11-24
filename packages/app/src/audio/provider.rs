@@ -28,7 +28,6 @@ impl AudioEngineProvider {
     // use this on user action to create the audio context
     // pub fn start<'a>(&'a mut self) {
     pub fn start(&mut self) {
-        console::log!("[audio] start");
         if self.is_started {
             return;
         }
@@ -42,9 +41,9 @@ impl AudioEngineProvider {
         }
     }
 
-    pub fn trigger(&self, event: &str, val: Option<f32>) {
+    pub fn trigger(&mut self, event: &str, val: Option<f32>) {
         if self.is_started {
-            match &self.audio_engine {
+            match & mut self.audio_engine {
                 Some(audio_engine) => audio_engine.trigger(event, val),
                 None => {}
             }

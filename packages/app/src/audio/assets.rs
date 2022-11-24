@@ -7,6 +7,7 @@ use web_sys::AudioBuffer;
 use web_sys::AudioContext;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 
+
 const NUM_ASSETS: usize = 1;
 // const NAMES: [&str; NUM_ASSETS] = ["music"];
 const URLS: [&str; NUM_ASSETS] = ["audio/music-a-115bpm.wav"];
@@ -37,19 +38,22 @@ pub async fn fetch_array_buffer(url: &str) -> ArrayBuffer {
 pub fn load() {
     spawn_local(async {
         let context = AudioContext::new().unwrap();
-        let array_buffer = fetch_array_buffer(URLS[0]).await;
-        let buffer = context.decode_audio_data(&array_buffer).unwrap();
-        let buffer = JsFuture::from(buffer);
-        let buffer = buffer.await;
-        let buffer = buffer.unwrap();
-        let buffer: AudioBuffer = buffer.dyn_into().unwrap();
-        unsafe {
-            BUFFERS[0] = Some(buffer);
+
+        for i in 0..NUM_ASSETS {
+            let array_buffer = fetch_array_buffer(URLS[i]).await;
+            let buffer = context.decode_audio_data(&array_buffer).unwrap();
+            let buffer = JsFuture::from(buffer);
+            let buffer = buffer.await;
+            let buffer = buffer.unwrap();
+            let buffer: AudioBuffer = buffer.dyn_into().unwrap();
+            unsafe {
+                BUFFERS[i] = Some(buffer);
+            }
         }
     })
 }
 
-pub fn get(index: usize) -> Option<AudioBuffer> {
+pub fn get_buffer(index: usize) -> Option<AudioBuffer> {
     unsafe {
         return BUFFERS[index].to_owned();
     }

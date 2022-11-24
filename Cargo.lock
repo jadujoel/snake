@@ -14,8 +14,10 @@ version = "0.1.0"
 dependencies = [
  "getrandom",
  "gloo 0.8.0",
+ "js-sys",
  "rand",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
  "wee_alloc",
  "yew",

@@ -19,6 +19,7 @@ pub fn app() -> Html {
     let seconds = 60.0 / bpm as f32 / division as f32;
 
     let world = use_mut_ref(|| World::new(width, height, start_index));
+    let is_started = use_mut_ref(|| false);
 
     let millis = use_state(|| (seconds * 1000.0) as u32);
     let reward = use_state(|| world.borrow().reward_cell());
@@ -27,15 +28,22 @@ pub fn app() -> Html {
 
     {
         let world = world.clone();
+        let is_started = is_started.clone();
         use_event_with_window("keydown", move |event: KeyboardEvent| {
             let mut world = world.borrow_mut();
+            let mut is_started = is_started.borrow_mut();
+            if !*is_started {
+                world.start_audio();
+                *is_started = true;
+                return;
+            }
             match event.key().as_str() {
                 "ArrowUp" => world.set_direction(Direction::Up),
                 "ArrowDown" => world.set_direction(Direction::Down),
                 "ArrowLeft" => world.set_direction(Direction::Left),
                 "ArrowRight" => world.set_direction(Direction::Right),
                 " " => match world.game_status() {
-                    GameStatus::Paused => world.start_game(),
+                    GameStatus::Paused => world.resume_game(),
                     GameStatus::Running => world.pause_game(),
                     GameStatus::Won => world.restart(),
                     GameStatus::Lost => world.restart(),
@@ -44,18 +52,18 @@ pub fn app() -> Html {
             }
         });
     }
-    {
-        let world = world.clone();
-        use_event_with_window("touchstart", move |_: TouchEvent| {
-            let mut world = world.borrow_mut();
-            match world.game_status() {
-                GameStatus::Paused => world.start_game(),
-                GameStatus::Running => world.pause_game(),
-                GameStatus::Won => world.restart(),
-                GameStatus::Lost => world.restart(),
-            }
-        });
-    }
+    // {
+    //     let world = world.clone();
+    //     use_event_with_window("touchstart", move |_: TouchEvent| {
+    //         let mut world = world.borrow_mut();
+    //         match world.game_status() {
+    //             GameStatus::Paused => world.start_game(),
+    //             GameStatus::Running => world.pause_game(),
+    //             GameStatus::Won => world.restart(),
+    //             GameStatus::Lost => world.restart(),
+    //         }
+    //     });
+    // }
 
     // update the game each interval
     {
@@ -81,45 +89,57 @@ pub fn app() -> Html {
     html! (
         <div class="game">
         {
-            match *status {
-                GameStatus::Paused => {
+            match *is_started.borrow() {
+                false => {
                     html! {
                         <div class="info">
-                            <h1>{ "Snake" }</h1>
-                            <p>{ "Use the arrow keys to move the snake around." }</p>
-                            <p>{ "Eat the food to grow longer." }</p>
-                            <p>{ "Don't run into yourself or the walls." }</p>
-                            <p>{ "Press space to start." }</p>
+                            <h1>{"Press any key to start"}</h1>
                         </div>
                     }
-                }
-                GameStatus::Won  => {
-                    html! {
-                        <div class="info">
-                            <h1>{ "You won!" }</h1>
-                            <p>{ "Press space to restart." }</p>
-                        </div>
+                },
+                true => {
+                    match *status {
+                        GameStatus::Paused => {
+                            html! {
+                                <div class="info">
+                                    <h1>{ "Snake" }</h1>
+                                    <p>{ "Use the arrow keys to move the snake around." }</p>
+                                    <p>{ "Eat the food to grow longer." }</p>
+                                    <p>{ "Don't run into yourself or the walls." }</p>
+                                    <p>{ "Press space to start." }</p>
+                                </div>
+                            }
+                        }
+                        GameStatus::Won  => {
+                            html! {
+                                <div class="info">
+                                    <h1>{ "You won!" }</h1>
+                                    <p>{ "Press space to restart." }</p>
+                                </div>
+                            }
+                        }
+                        GameStatus::Lost => {
+                            html! {
+                                <div class="info">
+                                    <h1>{ "You lost!" }</h1>
+                                    <p>{ "Press space to restart." }</p>
+                                </div>
+                            }
+                        }
+                        _ => {
+                            html!(
+                                <SnakeCanvas
+                                height={height as u32}
+                                width={width as u32}
+                                reward={*reward}
+                                body={body.to_vec()}
+                                />
+                            )
+                        }
                     }
-                }
-                GameStatus::Lost => {
-                    html! {
-                        <div class="info">
-                            <h1>{ "You lost!" }</h1>
-                            <p>{ "Press space to restart." }</p>
-                        </div>
-                    }
-                }
-                _ => {
-                    html!(
-                        <SnakeCanvas
-                        height={height as u32}
-                        width={width as u32}
-                        reward={*reward}
-                        body={body.to_vec()}
-                        />
-                    )
                 }
             }
+
         }
         </div>
     )

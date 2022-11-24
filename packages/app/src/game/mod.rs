@@ -29,6 +29,7 @@ pub struct World {
     status: GameStatus,
     points: usize,
     audio_system: AudioEngineProvider,
+    is_started: bool
 }
 
 impl World {
@@ -45,11 +46,39 @@ impl World {
             status: GameStatus::Paused,
             points: 0,
             audio_system,
+            is_started: false
         }
     }
 
+    pub fn start_game(&mut self) {
+        self.start_audio();
+        self.audio_system.trigger("start", None);
+        self.status = GameStatus::Running;
+        self.is_started = true;
+    }
+
+    pub fn pause_game(&mut self) {
+        self.audio_system.trigger("pause", None);
+        self.status = GameStatus::Paused;
+    }
+
+    pub fn resume_game(&mut self) {
+        if !self.is_started {
+            return self.start_game()
+        }
+        self.audio_system.trigger("resume", None);
+        self.status = GameStatus::Running;
+    }
+
+    pub fn restart(&mut self) {
+        self.audio_system.trigger("restart", None);
+        self.snake = Snake::new(self.snake_head_index(), 3);
+        self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
+        self.status = GameStatus::Paused;
+        self.points = 0;
+    }
+
     pub fn start_audio(&mut self) {
-        console::log!("[audio] start");
         self.audio_system.start();
     }
 
@@ -105,30 +134,6 @@ impl World {
             }
             _ => {}
         }
-    }
-
-    pub fn start_game(&mut self) {
-        self.start_audio();
-        self.audio_system.trigger("start", None);
-        self.status = GameStatus::Running;
-    }
-
-    pub fn resume_game(&mut self) {
-        self.audio_system.trigger("resume", None);
-        self.status = GameStatus::Running;
-    }
-
-    pub fn pause_game(&mut self) {
-        self.audio_system.trigger("pause", None);
-        self.status = GameStatus::Paused;
-    }
-
-    pub fn restart(&mut self) {
-        self.audio_system.trigger("restart", None);
-        self.snake = Snake::new(self.snake_head_index(), 3);
-        self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
-        self.status = GameStatus::Paused;
-        self.points = 0;
     }
 
     pub fn game_status(&self) -> GameStatus {
