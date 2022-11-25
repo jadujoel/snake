@@ -2,6 +2,7 @@ use super::math;
 use crate::utils::{clamp, random};
 use web_sys::AudioContext;
 
+#[allow(unused)]
 pub fn play_oscillator(context: &AudioContext, frequency: f32, gain: f32) {
     let now = context.current_time();
     let oscillator = context.create_oscillator().unwrap();
@@ -19,17 +20,18 @@ pub fn play_oscillator(context: &AudioContext, frequency: f32, gain: f32) {
         0.3,
     );
 
-    let gainNode = context.create_gain().unwrap();
-    gainNode.gain().set_value(math::linear_from_decibel(gain));
-    gainNode
+    let gain_node = context.create_gain().unwrap();
+    gain_node.gain().set_value(math::linear_from_decibel(gain));
+    gain_node
         .gain()
         .exponential_ramp_to_value_at_time(0.01, now + 0.3);
     oscillator
-        .connect_with_audio_node(&gainNode)
+        .connect_with_audio_node(&gain_node)
         .unwrap()
         .connect_with_audio_node(&context.destination());
 }
 
+#[allow(unused)]
 pub fn play_step(context: &AudioContext, frequency: f32, gain: f32) {
     let now = context.current_time();
     let oscillator = context.create_oscillator().unwrap();
@@ -45,17 +47,18 @@ pub fn play_step(context: &AudioContext, frequency: f32, gain: f32) {
         0.1,
     );
 
-    let gainNode = context.create_gain().unwrap();
-    gainNode.gain().set_value(math::linear_from_decibel(gain));
-    gainNode
+    let gain_node = context.create_gain().unwrap();
+    gain_node.gain().set_value(math::linear_from_decibel(gain));
+    gain_node
         .gain()
         .exponential_ramp_to_value_at_time(0.01, now + 0.1);
     oscillator
-        .connect_with_audio_node(&gainNode)
+        .connect_with_audio_node(&gain_node)
         .unwrap()
         .connect_with_audio_node(&context.destination());
 }
 
+#[allow(unused)]
 pub fn play_direction(context: &AudioContext, frequency: f32, gain: f32) {
     let now = context.current_time();
     let oscillator = context.create_oscillator().unwrap();
@@ -69,13 +72,13 @@ pub fn play_direction(context: &AudioContext, frequency: f32, gain: f32) {
         .frequency()
         .set_value_curve_at_time(&mut [frequency, frequency * 0.5], now, 0.3);
 
-    let gainNode = context.create_gain().unwrap();
-    gainNode.gain().set_value(math::linear_from_decibel(gain));
-    gainNode
+    let gain_node = context.create_gain().unwrap();
+    gain_node.gain().set_value(math::linear_from_decibel(gain));
+    gain_node
         .gain()
         .exponential_ramp_to_value_at_time(0.01, now + 0.3);
     oscillator
-        .connect_with_audio_node(&gainNode)
+        .connect_with_audio_node(&gain_node)
         .unwrap()
         .connect_with_audio_node(&context.destination());
 }

@@ -7,13 +7,23 @@ use web_sys::AudioBuffer;
 use web_sys::AudioContext;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 
-
 const NUM_ASSETS: usize = 1;
 // const NAMES: [&str; NUM_ASSETS] = ["music"];
 const URLS: [&str; NUM_ASSETS] = ["audio/music-a-115bpm.webm"];
-static mut BUFFERS: [Option<AudioBuffer>; NUM_ASSETS] = [None];
+static mut AUDIO_BUFFERS: [Option<AudioBuffer>; NUM_ASSETS] = [None];
 
-pub async fn fetch_array_buffer(url: &str) -> ArrayBuffer {
+// allows us to fetch buffers before audio context could be started
+static mut ARRAY_BUFFERS: [Option<ArrayBuffer>; NUM_ASSETS] = [None];
+
+pub async fn get_array_buffer(asset_index: usize) -> ArrayBuffer {
+    unsafe {
+        if ARRAY_BUFFERS[asset_index].is_some() {
+            return ARRAY_BUFFERS[asset_index].to_owned().unwrap();
+        }
+    }
+
+    let url = URLS[asset_index];
+
     let mut opts = RequestInit::new();
     opts.method("GET");
     opts.mode(RequestMode::Cors);
@@ -32,29 +42,62 @@ pub async fn fetch_array_buffer(url: &str) -> ArrayBuffer {
     let array_buffer_promise = resp.array_buffer().unwrap();
     let array_buffer = JsFuture::from(array_buffer_promise).await.unwrap();
     let array_buffer: ArrayBuffer = array_buffer.dyn_into().unwrap();
-    return array_buffer.to_owned();
+
+    unsafe {
+        ARRAY_BUFFERS[asset_index] = Some(array_buffer.to_owned());
+    }
+    return array_buffer;
 }
 
-pub fn load() {
+#[allow(unused)]
+pub fn spawn_load_array_buffers() {
     spawn_local(async {
-        let context = AudioContext::new().unwrap();
-
-        for i in 0..NUM_ASSETS {
-            let array_buffer = fetch_array_buffer(URLS[i]).await;
-            let buffer = context.decode_audio_data(&array_buffer).unwrap();
-            let buffer = JsFuture::from(buffer);
-            let buffer = buffer.await;
-            let buffer = buffer.unwrap();
-            let buffer: AudioBuffer = buffer.dyn_into().unwrap();
-            unsafe {
-                BUFFERS[i] = Some(buffer);
-            }
+        for asset_index in 0..NUM_ASSETS {
+            get_array_buffer(asset_index).await;
         }
+    })
+}
+
+pub async fn get_audio_buffer(asset_index: usize) -> AudioBuffer {
+    unsafe {
+        if AUDIO_BUFFERS[asset_index].is_some() {
+            return AUDIO_BUFFERS[asset_index].to_owned().unwrap();
+        }
+    }
+    let context = AudioContext::new().unwrap();
+    let array_buffer = get_array_buffer(asset_index).await;
+    let buffer = context.decode_audio_data(&array_buffer).unwrap();
+    let buffer = JsFuture::from(buffer);
+    let buffer = buffer.await;
+    let buffer = buffer.unwrap();
+    let buffer: AudioBuffer = buffer.dyn_into().unwrap();
+    unsafe {
+        AUDIO_BUFFERS[asset_index] = Some(buffer.to_owned());
+    }
+    return buffer;
+}
+
+#[allow(unused)]
+pub fn get_audio_buffer_sync(asset_index: usize) -> Option<AudioBuffer> {
+    unsafe {
+        AUDIO_BUFFERS[asset_index].to_owned()
+    }
+}
+
+pub async fn load_audio_buffers() {
+    for asset_index in 0..NUM_ASSETS {
+        get_audio_buffer(asset_index).await;
+    }
+}
+
+pub fn spawn_load_audio_buffers() {
+    spawn_local(async {
+        load_audio_buffers().await;
     })
 }
 
 pub fn get_buffer(index: usize) -> Option<AudioBuffer> {
     unsafe {
-        return BUFFERS[index].to_owned();
+        return AUDIO_BUFFERS[index].to_owned();
     }
 }

@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rimraf dist pkg",
     "prebuild": "bun run clean",
-    "build": "bun run build:rust && bun run build:minify && bun run build:copy",
+    "build": "bun run build:rust && bun run build:minify && bun run build:copy && bun run encode",
     "build:rust": "wasm-pack build --target web",
     "build:minify": "esbuild --bundle src-not-rust/app.ts --outfile=dist/app.js --minify --sourcemap",
     "build:copy": "cp src-not-rust/index.html dist/index.html && cp pkg/app_bg.wasm dist/app_bg.wasm",

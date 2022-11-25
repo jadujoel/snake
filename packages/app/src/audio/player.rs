@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use gloo::console;
 use web_sys::{AudioBufferSourceNode, AudioContext};
 
@@ -58,6 +56,7 @@ impl Player {
         }
     }
 
+    #[allow(unused)]
     pub fn pause(&mut self) {
         match &self.source {
             Some(source) => {
@@ -99,6 +98,7 @@ impl Player {
         }
     }
 
+    #[allow(unused)]
     pub fn speed_up(&mut self, duration: f64) {
         match &self.source {
             Some(source) => {
@@ -119,6 +119,7 @@ impl Player {
         }
     }
 
+    #[allow(unused)]
     pub fn stop(&mut self) {
         match &self.source {
             Some(source) => match source.stop() {

@@ -1,5 +1,4 @@
 mod snake;
-use gloo::console;
 use snake::{Snake, SnakeCell};
 use crate::{utils::random, audio::{provider::AudioEngineProvider}};
 

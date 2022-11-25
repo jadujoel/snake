@@ -1,7 +1,5 @@
-use gloo::console;
 use web_sys::AudioContext;
-
-use super::engine::AudioEngine;
+use super::{engine::AudioEngine, assets::spawn_load_audio_buffers};
 
 pub fn create_audio_context() -> Option<AudioContext> {
     let context = web_sys::AudioContext::new();
@@ -19,13 +17,14 @@ pub struct AudioEngineProvider {
 
 impl AudioEngineProvider {
     pub fn new() -> Self {
+        spawn_load_audio_buffers();
         Self {
             audio_engine: None,
             is_started: false,
         }
     }
 
-    // use this on user action to create the audio context
+    // use this on user action to create the audio context and initialize engine
     // pub fn start<'a>(&'a mut self) {
     pub fn start(&mut self) {
         if self.is_started {

@@ -4,10 +4,9 @@
   "description": "A simple audio encoder",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\"",
     "build": "cargo build --release",
-    "encode": "cargo run --release --bin encoder -- -i audio-sources -o audio-encoded",
-    "dev": "bun run build && bun run encode"
+    "encode": "cargo run --release --bin encoder -- -i audio-sources -o audio-encoded"
   },
   "repository": {
     "type": "git",
@@ -19,9 +18,5 @@
   "bugs": {
     "url": "https://github.com/jadujoel/encoder/issues"
   },
-  "homepage": "https://github.com/jadujoel/encoder#readme",
-  "devDependencies": {
-    "mkdirp": "1.0.4",
-    "rimraf": "3.0.2"
-  }
+  "homepage": "https://github.com/jadujoel/encoder#readme"
 }
