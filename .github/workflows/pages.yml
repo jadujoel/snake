@@ -49,8 +49,9 @@ jobs:
         with:
           bun-version: 0.2.2
 
-      - name: Setup ffmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v2.0.0
+      # - name: Setup ffmpeg
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
 
       - name: Install
         run: bun install turbo
