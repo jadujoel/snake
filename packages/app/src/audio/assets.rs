@@ -1,11 +1,15 @@
 use gloo::console;
 use js_sys::ArrayBuffer;
+use js_sys::Uint8Array;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
+use web_sys::window;
 use web_sys::AudioBuffer;
 use web_sys::AudioContext;
 use web_sys::{Request, RequestInit, RequestMode, Response};
+// use seek_bufread::BufReader;
+
 
 const NUM_ASSETS: usize = 1;
 // const NAMES: [&str; NUM_ASSETS] = ["music"];
@@ -14,6 +18,31 @@ static mut AUDIO_BUFFERS: [Option<AudioBuffer>; NUM_ASSETS] = [None];
 
 // allows us to fetch buffers before audio context could be started
 static mut ARRAY_BUFFERS: [Option<ArrayBuffer>; NUM_ASSETS] = [None];
+
+#[allow(dead_code)]
+pub async fn request() {
+    let origin = window().unwrap().location().origin().unwrap();
+    let full_url = format!("{}/{}", origin, URLS[0]);
+    console::log!("full_url:", full_url.to_owned());
+    let result = reqwest::get(full_url).await;
+    let response = match result {
+        Ok(response) => {
+            console::log!("response: OK");
+            response
+        }
+        Err(_) => {
+            console::log!("response: Err");
+            return;
+        }
+    };
+    // response.
+
+    let body = response.text().await.unwrap();
+    let buffer = Uint8Array::from(body.as_bytes()).buffer();
+    unsafe {
+        ARRAY_BUFFERS[0] = Some(buffer);
+    };
+}
 
 pub async fn get_array_buffer(asset_index: usize) -> ArrayBuffer {
     unsafe {
@@ -79,9 +108,7 @@ pub async fn get_audio_buffer(asset_index: usize) -> AudioBuffer {
 
 #[allow(unused)]
 pub fn get_audio_buffer_sync(asset_index: usize) -> Option<AudioBuffer> {
-    unsafe {
-        AUDIO_BUFFERS[asset_index].to_owned()
-    }
+    unsafe { AUDIO_BUFFERS[asset_index].to_owned() }
 }
 
 pub async fn load_audio_buffers() {

@@ -1,6 +1,9 @@
 [workspace]
-
 members = [
     "packages/app",
     "packages/encoder",
 ]
+
+[profile.release]
+lto = true
+panic = "abort"

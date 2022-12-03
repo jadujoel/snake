@@ -1,7 +1,7 @@
 {
   "name": "snake",
   "version": "0.0.1",
-  "description": "",
+  "description": "snake, the game",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jadujoel/snake.git"
@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/jadujoel/snake#readme",
   "workspaces": [
-    "packages/app"
+    "packages/*"
   ],
   "devDependencies": {
     "@types/glob": "8.0.0",
@@ -45,10 +45,10 @@
   },
   "scripts": {
     "version": "utils/sync-version.ts && git add \"*/package.json\"",
-    "postinstall": "bun husky install && cd packages/app && bun install",
+    "postinstall": "bun husky install && cd packages/app && bun install && cd ../packages/encoder && bun install",
     "prepare-rust": "cargo install wasm-pack || cargo install wasm-bindgen-cli || true",
     "prepare-linux": "sudo apt-get install clang lldb lld llvm cmake pkg-config libssl-dev && rustup component add rls rust-analysis rust-src ",
-    "serve": "turbo run serve",
+    "serve": "cd packages/app && bun run serve",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint"

@@ -1,5 +1,5 @@
 use web_sys::AudioContext;
-use super::{engine::AudioEngine, assets::spawn_load_audio_buffers};
+use super::{engine::AudioEngine, assets::{spawn_load_audio_buffers}};
 
 pub fn create_audio_context() -> Option<AudioContext> {
     let context = web_sys::AudioContext::new();

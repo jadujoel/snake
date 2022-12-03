@@ -2,13 +2,12 @@ use crate::board::SnakeCanvas;
 use crate::game::{Direction, GameStatus, World};
 use crate::utils::random;
 
-use web_sys::{KeyboardEvent};
+use web_sys::KeyboardEvent;
 use yew::{function_component, html, use_mut_ref, use_state};
 use yew_hooks::{use_event_with_window, use_interval};
 
 #[function_component(App)]
 pub fn app() -> Html {
-
     let width = 8;
     let height = 8;
     let size = (width * height) - 1;
@@ -52,18 +51,6 @@ pub fn app() -> Html {
             }
         });
     }
-    // {
-    //     let world = world.clone();
-    //     use_event_with_window("touchstart", move |_: TouchEvent| {
-    //         let mut world = world.borrow_mut();
-    //         match world.game_status() {
-    //             GameStatus::Paused => world.start_game(),
-    //             GameStatus::Running => world.pause_game(),
-    //             GameStatus::Won => world.restart(),
-    //             GameStatus::Lost => world.restart(),
-    //         }
-    //     });
-    // }
 
     // update the game each interval
     {
@@ -105,7 +92,7 @@ pub fn app() -> Html {
                                     <h1>{ "Snake" }</h1>
                                     <p>{ "Use the arrow keys to move the snake around." }</p>
                                     <p>{ "Eat the food to grow longer." }</p>
-                                    <p>{ "Don't run into yourself or the walls." }</p>
+                                    <p>{ "Don't run into yourself." }</p>
                                     <p>{ "Press space to start." }</p>
                                 </div>
                             }

@@ -2,8 +2,9 @@
 name = "encoder"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "An audio encoder cli using ffmpeg."
+license = "MIT"
+repository = "git+https://github.com/jadujoel/snake.git"
 
 [dependencies]
 ffmpeg-cli = "0.1.0"
@@ -11,9 +12,6 @@ futures = "0.3.25"
 path-clean = "0.1.0"
 tokio = "1.22.0"
 clap = { version = "4.0.27", features = ["derive"] }
-
-[profile.release]
-lto = true
 
 [[bin]]
 name = "encoder"

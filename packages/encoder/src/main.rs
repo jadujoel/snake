@@ -1,25 +1,9 @@
 use ffmpeg_cli::{FfmpegBuilder, File, Parameter};
-use std::fs;
-use std::process::Stdio;
-mod path;
-
-fn read_dir(path: &str) -> Vec<String> {
-    let paths = fs::read_dir(path).unwrap();
-
-    let mut files = vec![];
-    for path in paths {
-        let path = path.unwrap().path();
-        let absolute_path = path::absolute_path(path).unwrap().display().to_string();
-
-        // if file ends with extension .wav
-        if absolute_path.ends_with(".wav") {
-            files.push(absolute_path);
-        }
-    }
-
-    return files;
-}
+use std::{fs, process::Stdio};
+mod utils;
+mod sprite;
 use clap::Parser;
+use crate::utils::{absolute_path, read_dir};
 
 #[derive(Parser, Default, Debug)]
 struct Arguments {
@@ -39,68 +23,95 @@ struct Arguments {
     codec: String,
     #[clap(short, long, default_value = "128k")] // libopus, libvorbis, libmp3lame, libfdk_aac
     birate: String,
+    #[clap(short, long, default_value = "sprite")] // create a sprite file
+    sprite: String,
 }
 
 #[tokio::main]
 async fn main() {
-    let args = Arguments::parse();
-    let input_directory = path::absolute_path(&args.input_directory)
+    let Arguments {
+        input_directory,
+        output_directory,
+        sample_rate,
+        resampler,
+        codec,
+        birate,
+        input_extension,
+        output_extension,
+        sprite,
+        ..
+    } = Arguments::parse();
+
+    if sprite.len() > 0 {
+        sprite::sprite().await;
+    }
+
+    let input_directory = absolute_path(input_directory)
         .unwrap()
         .display()
         .to_string();
 
-    let output_directory = path::absolute_path(&args.output_directory)
+    let output_directory = absolute_path(output_directory)
         .unwrap()
         .display()
         .to_string();
 
-    println!("[encoder]: input directory: {}", input_directory);
-    println!("[encoder]: output directory: {}", output_directory);
-
-    #[allow(unused_must_use)]
-    {
-        fs::create_dir(&output_directory);
-    }
-    fn copy_string(str: String) -> String {
-        return str.to_string();
+    match fs::create_dir(&output_directory) {
+        Ok(_) => {},
+        // we don't care if the directory already exists, thats fine
+        Err(_) => {},
     }
 
-    println!("{:?}", args);
-    // let args: Vec<String> = env::args().collect();
-    // dbg!(args);
-
-    let input_paths = read_dir(&input_directory);
+    let input_paths = read_dir(&input_directory, "wav");
 
     let mut output_paths = vec![];
     for path in input_paths.to_owned() {
         let output_path = path.replace(&input_directory, &output_directory);
-        let output_path = output_path.replace(&args.input_extension, &args.output_extension);
+        let output_path = output_path.replace(&input_extension, &output_extension);
         output_paths.push(output_path.to_owned());
     }
 
     let it = input_paths.iter().zip(output_paths.iter());
 
-    for (input, output) in it {
-        // default
-        let output_path = output.to_owned();
-        let input_file = File::new(input);
-        let output_file = File::new(&output_path);
+    let mut handles = vec![];
 
-        println!("[encoder]: {}", output_file.url);
-        let builder = FfmpegBuilder::new()
-            .stderr(Stdio::piped())
-            .option(Parameter::Single("hide_banner"))
-            .option(Parameter::Single("nostdin"))
-            .option(Parameter::Single("y"))
-            .input(input_file)
-            .output(
-                output_file
-                    .option(Parameter::Single("y"))
-                    .option(Parameter::KeyValue("ar", &args.sample_rate))
-                    .option(Parameter::KeyValue("c:a", &args.codec))
-                    .option(Parameter::KeyValue("b:a", &args.birate)),
-            );
-        let ffmpeg = builder.run().await.unwrap();
-        ffmpeg.process.wait_with_output().unwrap();
+    for (input, output) in it {
+        // start a new thread for each process
+        let input = input.to_string();
+        let output = output.to_string();
+        let sample_rate = sample_rate.to_string();
+        let resampler = resampler.to_string();
+        let codec = codec.to_string();
+        let birate = birate.to_string();
+
+        let handle = tokio::spawn(async move {
+            let output_path = output.to_owned();
+            let input_file = File::new(&input);
+            let output_file = File::new(&output_path);
+
+            println!("[encoder]: {}", output_file.url);
+            let builder = FfmpegBuilder::new()
+                .stderr(Stdio::piped())
+                .option(Parameter::Single("hide_banner"))
+                .option(Parameter::Single("nostdin"))
+                .option(Parameter::Single("y"))
+                .input(input_file)
+                .output(
+                    output_file
+                        .option(Parameter::Single("y"))
+                        .option(Parameter::KeyValue("ar", &sample_rate))
+                        .option(Parameter::KeyValue("resampler", &resampler))
+                        .option(Parameter::KeyValue("c:a", &codec))
+                        .option(Parameter::KeyValue("b:a", &birate)),
+                );
+            let ffmpeg = builder.run().await.unwrap();
+            ffmpeg.process.wait_with_output().unwrap();
+        });
+        handles.push(handle);
     }
+
+    for handle in handles {
+        handle.await.unwrap();
+    }
+
 }

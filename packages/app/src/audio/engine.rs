@@ -42,7 +42,6 @@ impl AudioEngine {
                 play::play_oscillator(&self.context, 1600.0, -18.0);
             }
             "resume" => {
-                // self.player.resume();
                 self.player.resume();
                 play::play_oscillator(&self.context, 880.0, -18.0);
             }
@@ -62,19 +61,7 @@ impl AudioEngine {
                 play::play_direction(&self.context, note_to_frequency(note), -18.0);
             }
             "step" => {
-                // play::play_step(
-                //     &self.context,
-                //     match val {
-                //         Some(val) => {
-                //             let note =
-                //                 CMAJOR_SCALE[val as usize % CMAJOR_SCALE.len()] % Note::C4 + Note::C3;
-                //             let frequency = note_to_frequency(note);
-                //             frequency
-                //         }
-                //         None => 440.0,
-                //     },
-                //     -96.0,
-                // ),
+
             }
             _ => {}
         }

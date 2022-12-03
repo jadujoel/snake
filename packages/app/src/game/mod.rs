@@ -1,4 +1,5 @@
 mod snake;
+use gloo::console;
 use snake::{Snake, SnakeCell};
 use crate::{utils::random, audio::{provider::AudioEngineProvider}};
 
@@ -78,6 +79,7 @@ impl World {
     }
 
     pub fn start_audio(&mut self) {
+        console::log!("start audio");
         self.audio_system.start();
     }
 
