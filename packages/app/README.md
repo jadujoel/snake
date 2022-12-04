@@ -10,6 +10,8 @@
     * embedd assets into one file
 * Controls
     * add touch controls for mobile device
+* App
+    * Make css scoped: https://crates.io/crates/styled-yew/0.3.0
 ## Notes:
 web-worker: https://github.com/yewstack/yew/blob/yew-v0.19.3/examples/web_worker_fib/src/agent.rs
 build gui using webgl: https://www.egui.rs/

@@ -10,7 +10,6 @@ use web_sys::AudioContext;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 // use seek_bufread::BufReader;
 
-
 const NUM_ASSETS: usize = 1;
 // const NAMES: [&str; NUM_ASSETS] = ["music"];
 const URLS: [&str; NUM_ASSETS] = ["audio/music-a-115bpm.webm"];
@@ -56,7 +55,7 @@ pub async fn get_array_buffer(asset_index: usize) -> ArrayBuffer {
     let mut opts = RequestInit::new();
     opts.method("GET");
     opts.mode(RequestMode::Cors);
-    let request = Request::new_with_str_and_init(&url, &opts).unwrap();
+    let request = Request::new_with_str_and_init(url, &opts).unwrap();
     request.headers().set("Accept", "application").unwrap();
 
     let window = web_sys::window().unwrap();
@@ -75,7 +74,7 @@ pub async fn get_array_buffer(asset_index: usize) -> ArrayBuffer {
     unsafe {
         ARRAY_BUFFERS[asset_index] = Some(array_buffer.to_owned());
     }
-    return array_buffer;
+    array_buffer
 }
 
 #[allow(unused)]
@@ -103,7 +102,7 @@ pub async fn get_audio_buffer(asset_index: usize) -> AudioBuffer {
     unsafe {
         AUDIO_BUFFERS[asset_index] = Some(buffer.to_owned());
     }
-    return buffer;
+    buffer
 }
 
 #[allow(unused)]
@@ -124,7 +123,5 @@ pub fn spawn_load_audio_buffers() {
 }
 
 pub fn get_buffer(index: usize) -> Option<AudioBuffer> {
-    unsafe {
-        return AUDIO_BUFFERS[index].to_owned();
-    }
+    unsafe { AUDIO_BUFFERS[index].to_owned() }
 }

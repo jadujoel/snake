@@ -42,7 +42,7 @@ pub fn play_step(context: &AudioContext, frequency: f32, gain: f32) {
     oscillator.start().unwrap();
     oscillator.stop_with_when(now + 0.4);
     oscillator.frequency().set_value_curve_at_time(
-        &mut [frequency + random(0, 20) as f32, frequency / 2.0 as f32],
+        &mut [frequency + random(0, 20) as f32, frequency / 2.0],
         now,
         0.1,
     );

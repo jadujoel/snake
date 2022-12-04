@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\"",
     "build": "cargo build --release",
-    "encode": "cargo run --release --bin encoder -- -i audio-sources -o audio-encoded"
+    "encode": "cargo run --release --bin encoder -- -i audio-sources -o audio-encoded",
+    "lint": "cargo clippy --all-features -- -D clippy::pedantic"
   },
   "repository": {
     "type": "git",

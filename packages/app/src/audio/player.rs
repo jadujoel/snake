@@ -68,33 +68,27 @@ impl Player {
     }
 
     pub fn resume(&mut self) {
-        match &self.source {
-            Some(source) => match source.playback_rate().cancel_scheduled_values(0.0) {
-                Ok(param) => param.set_value(self.playback_rate),
-                Err(_) => {}
-            },
-            None => {}
+        if let Some(ref source) = &self.source {
+            if let Ok(ref param) = source.playback_rate().cancel_scheduled_values(0.0) {
+                param.set_value(self.playback_rate)
+            }
         }
         self.is_playing = true;
     }
 
     pub fn slow_down(&mut self, duration: f64) {
-        match &self.source {
-            Some(source) => match source.playback_rate().cancel_scheduled_values(0.0) {
-                Ok(param) => {
-                    let current = source.playback_rate().value();
-                    match param.set_value_curve_at_time(
-                        &mut [current, 0.0 as f32],
-                        self.context.current_time(),
-                        duration,
-                    ) {
-                        Ok(_) => {}
-                        Err(_) => {}
-                    }
+        if let Some(ref source) = &self.source {
+            let start_time = 0.0;
+            if let Ok(ref param) = source.playback_rate().cancel_scheduled_values(start_time) {
+                let current = source.playback_rate().value();
+                let mut values = [current, 0.0];
+                let start_time = self.context.current_time();
+                if let Err(ref _param) =
+                    param.set_value_curve_at_time(&mut values, start_time, duration)
+                {
+                    console::log!("[player] Error setting value curve during slow down.")
                 }
-                Err(_) => {}
-            },
-            None => {}
+            }
         }
     }
 
@@ -103,16 +97,20 @@ impl Player {
         match &self.source {
             Some(source) => {
                 let current = source.playback_rate().value();
+                let mut values = [current, 1.0];
+                let start_time = self.context.current_time();
                 let result = source.playback_rate().set_value_curve_at_time(
-                    &mut [current, 1.0 as f32],
-                    self.context.current_time(),
+                    &mut values,
+                    start_time,
                     duration,
                 );
                 match result {
                     Ok(_) => {
                         self.is_playing = true;
                     }
-                    Err(_) => {}
+                    Err(_) => {
+                        console::error!("[player] Error setting value curve for speed up")
+                    }
                 }
             }
             None => {}
@@ -121,13 +119,7 @@ impl Player {
 
     #[allow(unused)]
     pub fn stop(&mut self) {
-        match &self.source {
-            Some(source) => match source.stop() {
-                Ok(_) => {}
-                Err(_) => {}
-            },
-            None => {}
-        }
+        if let Some(ref source) = &self.source {}
         self.is_playing = false;
     }
 }

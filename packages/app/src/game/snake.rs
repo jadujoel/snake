@@ -1,10 +1,10 @@
 
 use crate::game::Direction;
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub struct SnakeCell(pub usize);
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Eq, Clone)]
 pub struct Snake {
     pub body: Vec<SnakeCell>,
     pub direction: Direction,

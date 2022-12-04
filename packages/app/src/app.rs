@@ -56,7 +56,7 @@ pub fn app() -> Html {
     {
         let body = body.clone();
         let reward = reward.clone();
-        let world = world.clone();
+        // let world = world.clone();
         let status = status.clone();
         use_interval(
             move || {

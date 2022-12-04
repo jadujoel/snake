@@ -2,7 +2,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlCanvasElement;
 use yew::{function_component, html, use_node_ref, use_state, Properties};
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, PartialEq, Eq, Properties)]
 pub struct Props {
     pub width: u32,
     pub height: u32,
@@ -50,10 +50,9 @@ pub fn gui(props: &Props) -> Html {
         ctx: &web_sys::CanvasRenderingContext2d,
         width: u32,
         cell_size: u32,
-        body: &Vec<usize>,
+        body: &[usize],
     ) {
-        let mut index = 0;
-        for cell in body {
+        for (index, cell) in body.iter().enumerate() {
             let color = if index == 0 { "#3b20d5" } else { "#a14393" };
             ctx.set_fill_style(&JsValue::from_str(color));
             let col = cell % width as usize;
@@ -65,7 +64,6 @@ pub fn gui(props: &Props) -> Html {
                 (cell_size - 1) as f64,
                 (cell_size - 1) as f64,
             );
-            index += 1;
         }
         ctx.stroke();
     }
@@ -97,25 +95,19 @@ pub fn gui(props: &Props) -> Html {
             .dyn_into::<web_sys::CanvasRenderingContext2d>()
             .unwrap();
 
-        draw_board(&context, width.clone(), height.clone(), *cell_size);
-        match reward {
-            Some(reward) => {
-                draw_reward(&context, width.clone(), *cell_size, reward as u32);
-            }
-            None => {}
+        draw_board(&context, width, height, *cell_size);
+        if let Some(reward) = reward {
+            draw_reward(&context, width, *cell_size, reward as u32);
         }
-        draw_snake(&context, width.clone(), *cell_size, &body);
+        draw_snake(&context, width, *cell_size, &body);
         // Perform the cleanup
         || {}
     };
 
-    match node_ref.cast::<HtmlCanvasElement>() {
-        Some(canvas) => {
-            canvas.set_width(canvas_width);
-            canvas.set_height(canvas_height);
-            draw(&canvas)();
-        }
-        None => {}
+    if let Some(ref canvas) = node_ref.cast::<HtmlCanvasElement>() {
+        canvas.set_width(canvas_width);
+        canvas.set_height(canvas_height);
+        draw(canvas)();
     };
 
     html!(

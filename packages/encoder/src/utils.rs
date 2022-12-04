@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 use std::io;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 
 use path_clean::PathClean;
 
@@ -12,11 +12,11 @@ pub fn absolute_path(path: impl AsRef<Path>) -> io::Result<PathBuf> {
         path.to_path_buf()
     } else {
         env::current_dir()?.join(path)
-    }.clean();
+    }
+    .clean();
 
     Ok(absolute_path)
 }
-
 
 pub fn read_dir(path: &str, extension: &str) -> Vec<String> {
     let paths = fs::read_dir(path).unwrap();
@@ -31,10 +31,26 @@ pub fn read_dir(path: &str, extension: &str) -> Vec<String> {
             files.push(absolute_path);
         }
     }
-    return files;
+    files
 }
 
 // https://stackoverflow.com/questions/23975391/how-to-convert-a-string-into-a-static-str
-pub fn string_to_static_str(s: String) -> &'static str {
+pub fn leak_str(s: String) -> &'static str {
     Box::leak(s.into_boxed_str())
+}
+
+pub fn get_wavs(dir: &str) -> Vec<String> {
+    let dir = absolute_path(dir).unwrap().display().to_string();
+
+    read_dir(&dir, "wav")
+}
+
+pub fn get_absolute(dir: &str) -> String {
+    absolute_path(dir).unwrap().display().to_string()
+}
+
+pub fn create_dir(dir: &str) {
+    if let Err(_err) = fs::create_dir(dir) {
+        // we don't care if the directory already exists, thats fine
+    }
 }

@@ -1,31 +1,10 @@
 use ffmpeg_cli::{FfmpegBuilder, File, Parameter};
-use std::{fs, process::Stdio};
-mod utils;
+use std::process::Stdio;
+use utils::{create_dir, get_absolute, get_wavs};
+mod arguments;
 mod sprite;
-use clap::Parser;
-use crate::utils::{absolute_path, read_dir};
-
-#[derive(Parser, Default, Debug)]
-struct Arguments {
-    #[clap(short, long, default_value = "audio-sources")]
-    input_directory: String,
-    #[clap(short, long, default_value = "audio-encoded")]
-    output_directory: String,
-    #[clap(long, default_value = "wav")]
-    input_extension: String,
-    #[clap(long, default_value = "webm")]
-    output_extension: String,
-    #[clap(short, long, default_value = "48000")]
-    sample_rate: String,
-    #[clap(short, long, default_value = "soxr")] // soxr, swr
-    resampler: String,
-    #[clap(short, long, default_value = "libopus")] // libopus, libvorbis, libmp3lame, libfdk_aac
-    codec: String,
-    #[clap(short, long, default_value = "128k")] // libopus, libvorbis, libmp3lame, libfdk_aac
-    birate: String,
-    #[clap(short, long, default_value = "sprite")] // create a sprite file
-    sprite: String,
-}
+mod utils;
+use arguments::{get, Arguments};
 
 #[tokio::main]
 async fn main() {
@@ -40,41 +19,23 @@ async fn main() {
         output_extension,
         sprite,
         ..
-    } = Arguments::parse();
+    } = get();
 
-    if sprite.len() > 0 {
-        sprite::sprite().await;
-    }
+    let input_directory = get_absolute(&input_directory);
+    let output_directory = get_absolute(&output_directory);
+    let input_paths = get_wavs(&input_directory);
 
-    let input_directory = absolute_path(input_directory)
-        .unwrap()
-        .display()
-        .to_string();
-
-    let output_directory = absolute_path(output_directory)
-        .unwrap()
-        .display()
-        .to_string();
-
-    match fs::create_dir(&output_directory) {
-        Ok(_) => {},
-        // we don't care if the directory already exists, thats fine
-        Err(_) => {},
-    }
-
-    let input_paths = read_dir(&input_directory, "wav");
+    create_dir(&output_directory);
 
     let mut output_paths = vec![];
-    for path in input_paths.to_owned() {
+    for path in input_paths.clone() {
         let output_path = path.replace(&input_directory, &output_directory);
         let output_path = output_path.replace(&input_extension, &output_extension);
-        output_paths.push(output_path.to_owned());
+        output_paths.push(output_path.clone());
     }
 
-    let it = input_paths.iter().zip(output_paths.iter());
-
     let mut handles = vec![];
-
+    let it = input_paths.iter().zip(output_paths.iter());
     for (input, output) in it {
         // start a new thread for each process
         let input = input.to_string();
@@ -85,7 +46,7 @@ async fn main() {
         let birate = birate.to_string();
 
         let handle = tokio::spawn(async move {
-            let output_path = output.to_owned();
+            let output_path = output.clone();
             let input_file = File::new(&input);
             let output_file = File::new(&output_path);
 
@@ -101,8 +62,8 @@ async fn main() {
                         .option(Parameter::Single("y"))
                         .option(Parameter::KeyValue("ar", &sample_rate))
                         .option(Parameter::KeyValue("resampler", &resampler))
-                        .option(Parameter::KeyValue("c:a", &codec))
-                        .option(Parameter::KeyValue("b:a", &birate)),
+                        .option(Parameter::KeyValue("c", &codec))
+                        .option(Parameter::KeyValue("b", &birate)),
                 );
             let ffmpeg = builder.run().await.unwrap();
             ffmpeg.process.wait_with_output().unwrap();
@@ -114,4 +75,7 @@ async fn main() {
         handle.await.unwrap();
     }
 
+    if !sprite.is_empty() {
+        sprite::sprite().await;
+    }
 }

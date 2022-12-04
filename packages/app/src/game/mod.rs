@@ -1,9 +1,9 @@
 mod snake;
+use crate::{audio::provider::AudioEngineProvider, utils::random};
 use gloo::console;
 use snake::{Snake, SnakeCell};
-use crate::{utils::random, audio::{provider::AudioEngineProvider}};
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Direction {
     Up,
     Down,
@@ -11,7 +11,7 @@ pub enum Direction {
     Right,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum GameStatus {
     Paused,
     Won,
@@ -29,7 +29,7 @@ pub struct World {
     status: GameStatus,
     points: usize,
     audio_system: AudioEngineProvider,
-    is_started: bool
+    is_started: bool,
 }
 
 impl World {
@@ -46,7 +46,7 @@ impl World {
             status: GameStatus::Paused,
             points: 0,
             audio_system,
-            is_started: false
+            is_started: false,
         }
     }
 
@@ -64,7 +64,7 @@ impl World {
 
     pub fn resume_game(&mut self) {
         if !self.is_started {
-            return self.start_game()
+            return self.start_game();
         }
         self.audio_system.trigger("resume", None);
         self.status = GameStatus::Running;
@@ -92,48 +92,46 @@ impl World {
     }
 
     pub fn step(&mut self) {
-        match self.status {
-            GameStatus::Running => {
-
-                let temp = self.snake.body.clone();
-                match self.next_cell {
-                    Some(cell) => {
-                        self.snake.body[0] = cell;
-                        self.next_cell = None;
-                    }
-                    None => {
-                        self.snake.body[0] = self.gen_next_snake_cell(&self.snake.direction);
-                    }
-                }
-                self.audio_system.trigger("step", Some(self.snake.body[0].0 as f32));
-
-                let len = self.snake.body.len();
-
-                for i in 1..len {
-                    self.snake.body[i] = SnakeCell(temp[i - 1].0);
-                }
-
-                if self.snake.body[1..len].contains(&self.snake.body[0]) {
-                    self.audio_system.trigger("lose", None);
-                    self.status = GameStatus::Lost
-                }
-
-                if self.reward_cell == Some(self.snake_head_index()) {
-                    if len < self.size {
-                        self.points += 1;
-                        self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
-                        self.audio_system.trigger("eat", Some(self.snake_body().len() as f32));
-
-                    } else {
-                        self.reward_cell = None;
-                        self.status = GameStatus::Won;
-                        self.audio_system.trigger("win", None);
-                    }
-
-                    self.snake.body.push(SnakeCell(self.snake.body[1].0));
-                }
+        if self.status != GameStatus::Running {
+            return;
+        }
+        let temp = self.snake.body.clone();
+        match self.next_cell {
+            Some(cell) => {
+                self.snake.body[0] = cell;
+                self.next_cell = None;
             }
-            _ => {}
+            None => {
+                self.snake.body[0] = self.gen_next_snake_cell(&self.snake.direction);
+            }
+        }
+        self.audio_system
+            .trigger("step", Some(self.snake.body[0].0 as f32));
+
+        let len = self.snake.body.len();
+
+        for i in 1..len {
+            self.snake.body[i] = SnakeCell(temp[i - 1].0);
+        }
+
+        if self.snake.body[1..len].contains(&self.snake.body[0]) {
+            self.audio_system.trigger("lose", None);
+            self.status = GameStatus::Lost
+        }
+
+        if self.reward_cell == Some(self.snake_head_index()) {
+            if len < self.size {
+                self.points += 1;
+                self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
+                self.audio_system
+                    .trigger("eat", Some(self.snake_body().len() as f32));
+            } else {
+                self.reward_cell = None;
+                self.status = GameStatus::Won;
+                self.audio_system.trigger("win", None);
+            }
+
+            self.snake.body.push(SnakeCell(self.snake.body[1].0));
         }
     }
 
@@ -145,7 +143,8 @@ impl World {
         if direction == self.snake.direction {
             return;
         }
-        self.audio_system.trigger("direction", Some(direction as u8 as f32));
+        self.audio_system
+            .trigger("direction", Some(direction as u8 as f32));
         let next_cell = self.gen_next_snake_cell(&direction);
         if self.snake.body[1] == next_cell {
             return;
@@ -163,7 +162,7 @@ impl World {
         let snake_idx = self.snake_head_index();
         let row = snake_idx / self.width;
 
-        return match direction {
+        match direction {
             Direction::Right => {
                 let treshold = (row + 1) * self.width;
                 if snake_idx + 1 == treshold {
@@ -196,10 +195,10 @@ impl World {
                     SnakeCell(snake_idx + self.width)
                 }
             }
-        };
+        }
     }
 
-    fn gen_reward_cell(max: usize, snake_body: &Vec<SnakeCell>) -> Option<usize> {
+    fn gen_reward_cell(max: usize, snake_body: &[SnakeCell]) -> Option<usize> {
         let mut reward_cell;
         loop {
             reward_cell = random(0, max);
