@@ -37,7 +37,6 @@ pub fn snake_canvas(props: &Props) -> Html {
 
         draw_board(&context, width, height, cell_size);
         if let Some(reward) = reward {
-            #[allow(clippy::cast_precision_loss)]
             draw_reward(&context, width, cell_size, u32_from_usize(reward));
         }
         draw_snake(&context, width, cell_size, &body);

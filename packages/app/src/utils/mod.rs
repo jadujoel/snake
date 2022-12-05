@@ -30,3 +30,8 @@ pub fn f32_from_usize(x: usize) -> f32 {
 pub fn u32_from_usize(x: usize) -> u32 {
     x.try_into().unwrap()
 }
+
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+pub fn u32_from_f64(x: f64) -> u32 {
+    x.clamp(0.0, u32::MAX.try_into().unwrap()) as u32
+}

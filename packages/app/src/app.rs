@@ -1,6 +1,6 @@
 use crate::game::{Direction, Status, World};
 use crate::render::SnakeCanvas;
-use crate::utils::{random_usize, u32_from_usize};
+use crate::utils::{random_usize, u32_from_usize, u32_from_f64};
 
 use web_sys::KeyboardEvent;
 use yew::{function_component, html, use_mut_ref, use_state};
@@ -20,10 +20,7 @@ pub fn app() -> Html {
     let world = use_mut_ref(|| World::new(width, height, start_index));
     let is_started = use_mut_ref(|| false);
 
-    // allow truncate
-
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-    let millis = use_state(|| (seconds * 1000.0).trunc() as u32);
+    let millis = use_state(|| u32_from_f64(seconds * 1000.0));
     let reward = use_state(|| world.borrow().reward_cell());
     let status = use_state(|| world.borrow().game_status());
     let body = use_state(|| world.borrow().snake_body());
