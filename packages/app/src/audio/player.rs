@@ -70,7 +70,7 @@ impl Player {
     pub fn resume(&mut self) {
         if let Some(ref source) = &self.source {
             if let Ok(ref param) = source.playback_rate().cancel_scheduled_values(0.0) {
-                param.set_value(self.playback_rate)
+                param.set_value(self.playback_rate);
             }
         }
         self.is_playing = true;
@@ -86,7 +86,7 @@ impl Player {
                 if let Err(ref _param) =
                     param.set_value_curve_at_time(&mut values, start_time, duration)
                 {
-                    console::log!("[player] Error setting value curve during slow down.")
+                    console::log!("[player] Error setting value curve during slow down.");
                 }
             }
         }
@@ -109,7 +109,7 @@ impl Player {
                         self.is_playing = true;
                     }
                     Err(_) => {
-                        console::error!("[player] Error setting value curve for speed up")
+                        console::error!("[player] Error setting value curve for speed up");
                     }
                 }
             }

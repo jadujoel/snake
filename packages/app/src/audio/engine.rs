@@ -2,24 +2,20 @@ use gloo::console;
 use web_sys::AudioContext;
 
 use crate::{
-    audio::{
-        note::{note_to_frequency, CMAJOR_SCALE},
-        play,
-        player::Player,
-    },
-    utils::random,
+    audio::{play, player::Player, scales},
+    utils::random_usize,
 };
 
 #[derive(Clone)]
-pub struct AudioEngine {
+pub struct Engine {
     context: AudioContext,
     player: Player,
 }
 
-impl AudioEngine {
+impl Engine {
     pub fn new(context: AudioContext) -> Self {
         // assets::load_audio_buffers();
-        let player = Player::new(context.to_owned());
+        let player = Player::new(context.clone());
         Self { context, player }
     }
 
@@ -27,42 +23,41 @@ impl AudioEngine {
         self.player.play(&self.context);
     }
 
-    pub fn trigger(&mut self, event: &str, val: Option<f32>) {
+    pub fn trigger(&mut self, event: &str, val: Option<f64>) {
         if event != "step" {
             console::log!("[engine] event", event, val);
         }
+        #[allow(clippy::match_same_arms)]
         match event {
             "eat" => {
-                play::play_oscillator(&self.context, 440.0, -18.0);
+                play::oscillator(&self.context, 440.0, -18.0);
             }
             "start" => {
                 self.start();
             }
             "pause" => {
-                play::play_oscillator(&self.context, 1600.0, -18.0);
+                play::oscillator(&self.context, 1600.0, -18.0);
             }
             "resume" => {
                 self.player.resume();
-                play::play_oscillator(&self.context, 880.0, -18.0);
+                play::oscillator(&self.context, 880.0, -18.0);
             }
             "restart" => {
-                play::play_oscillator(&self.context, 880.0, -18.0);
+                play::oscillator(&self.context, 880.0, -18.0);
             }
             "win" => {
-                play::play_oscillator(&self.context, 1600.0, -18.0);
+                play::oscillator(&self.context, 1600.0, -18.0);
             }
             "lose" => {
                 self.player.slow_down(2.0);
-                play::play_oscillator(&self.context, 220.0, -9.0);
+                play::oscillator(&self.context, 220.0, -9.0);
             }
             "direction" => {
-                let random = random(12, 24);
-                let note = CMAJOR_SCALE[random % CMAJOR_SCALE.len()];
-                play::play_direction(&self.context, note_to_frequency(note), -18.0);
+                let random = random_usize(12, 24);
+                let note = scales::CMAJOR[random % scales::CMAJOR.len()];
+                play::direction(&self.context, note.to_frequency(), -18.0);
             }
-            "step" => {
-
-            }
+            "step" => {}
             _ => {}
         }
     }

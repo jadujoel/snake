@@ -34,11 +34,6 @@ pub fn read_dir(path: &str, extension: &str) -> Vec<String> {
     files
 }
 
-// https://stackoverflow.com/questions/23975391/how-to-convert-a-string-into-a-static-str
-pub fn leak_str(s: String) -> &'static str {
-    Box::leak(s.into_boxed_str())
-}
-
 pub fn get_wavs(dir: &str) -> Vec<String> {
     let dir = absolute_path(dir).unwrap().display().to_string();
 

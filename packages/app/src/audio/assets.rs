@@ -22,19 +22,17 @@ static mut ARRAY_BUFFERS: [Option<ArrayBuffer>; NUM_ASSETS] = [None];
 pub async fn request() {
     let origin = window().unwrap().location().origin().unwrap();
     let full_url = format!("{}/{}", origin, URLS[0]);
-    console::log!("full_url:", full_url.to_owned());
-    let result = reqwest::get(full_url).await;
-    let response = match result {
-        Ok(response) => {
-            console::log!("response: OK");
+    console::log!("full_url:", full_url.clone());
+    let result = reqwest::get(full_url.clone()).await;
+    let response = {
+        if let Ok(response) = result {
             response
         }
-        Err(_) => {
-            console::log!("response: Err");
+        else {
+            console::error!("response: error requesting file {}", full_url.clone());
             return;
         }
     };
-    // response.
 
     let body = response.text().await.unwrap();
     let buffer = Uint8Array::from(body.as_bytes()).buffer();
@@ -46,7 +44,7 @@ pub async fn request() {
 pub async fn get_array_buffer(asset_index: usize) -> ArrayBuffer {
     unsafe {
         if ARRAY_BUFFERS[asset_index].is_some() {
-            return ARRAY_BUFFERS[asset_index].to_owned().unwrap();
+            return ARRAY_BUFFERS[asset_index].clone().unwrap();
         }
     }
 
@@ -64,15 +62,14 @@ pub async fn get_array_buffer(asset_index: usize) -> ArrayBuffer {
         .unwrap();
 
     assert!(resp_value.is_instance_of::<Response>());
-    let resp: Response = resp_value.to_owned().dyn_into().unwrap();
-    console::log!(resp_value.clone());
+    let resp: Response = resp_value.clone().dyn_into().unwrap();
 
     let array_buffer_promise = resp.array_buffer().unwrap();
     let array_buffer = JsFuture::from(array_buffer_promise).await.unwrap();
     let array_buffer: ArrayBuffer = array_buffer.dyn_into().unwrap();
 
     unsafe {
-        ARRAY_BUFFERS[asset_index] = Some(array_buffer.to_owned());
+        ARRAY_BUFFERS[asset_index] = Some(array_buffer.clone());
     }
     array_buffer
 }
@@ -83,13 +80,13 @@ pub fn spawn_load_array_buffers() {
         for asset_index in 0..NUM_ASSETS {
             get_array_buffer(asset_index).await;
         }
-    })
+    });
 }
 
 pub async fn get_audio_buffer(asset_index: usize) -> AudioBuffer {
     unsafe {
-        if AUDIO_BUFFERS[asset_index].is_some() {
-            return AUDIO_BUFFERS[asset_index].to_owned().unwrap();
+        if let Some(audio_buffer) = AUDIO_BUFFERS[asset_index].clone() {
+            return audio_buffer;
         }
     }
     let context = AudioContext::new().unwrap();
@@ -100,14 +97,14 @@ pub async fn get_audio_buffer(asset_index: usize) -> AudioBuffer {
     let buffer = buffer.unwrap();
     let buffer: AudioBuffer = buffer.dyn_into().unwrap();
     unsafe {
-        AUDIO_BUFFERS[asset_index] = Some(buffer.to_owned());
+        AUDIO_BUFFERS[asset_index] = Some(buffer.clone());
     }
     buffer
 }
 
 #[allow(unused)]
 pub fn get_audio_buffer_sync(asset_index: usize) -> Option<AudioBuffer> {
-    unsafe { AUDIO_BUFFERS[asset_index].to_owned() }
+    unsafe { AUDIO_BUFFERS[asset_index].clone() }
 }
 
 pub async fn load_audio_buffers() {
@@ -119,9 +116,9 @@ pub async fn load_audio_buffers() {
 pub fn spawn_load_audio_buffers() {
     spawn_local(async {
         load_audio_buffers().await;
-    })
+    });
 }
 
 pub fn get_buffer(index: usize) -> Option<AudioBuffer> {
-    unsafe { AUDIO_BUFFERS[index].to_owned() }
+    unsafe { AUDIO_BUFFERS[index].clone() }
 }

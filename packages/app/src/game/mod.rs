@@ -1,7 +1,9 @@
 mod snake;
-use crate::{audio::provider::AudioEngineProvider, utils::random};
-use gloo::console;
-use snake::{Snake, SnakeCell};
+use crate::{
+    audio,
+    utils::{f64_from_usize, random_usize},
+};
+use snake::{Cell, Snake};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Direction {
@@ -12,7 +14,7 @@ pub enum Direction {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum GameStatus {
+pub enum Status {
     Paused,
     Won,
     Lost,
@@ -24,11 +26,11 @@ pub struct World {
     width: usize,
     size: usize,
     snake: snake::Snake,
-    next_cell: Option<SnakeCell>,
+    next_cell: Option<Cell>,
     reward_cell: Option<usize>,
-    status: GameStatus,
+    status: Status,
     points: usize,
-    audio_system: AudioEngineProvider,
+    audio_system: audio::System,
     is_started: bool,
 }
 
@@ -36,14 +38,14 @@ impl World {
     pub fn new(width: usize, height: usize, spawn_index: usize) -> World {
         let size = width * height;
         let snake = Snake::new(spawn_index, 3);
-        let audio_system = AudioEngineProvider::new();
+        let audio_system = audio::System::new();
         World {
             width,
             size,
-            reward_cell: World::gen_reward_cell(size, &snake.body),
+            reward_cell: Some(World::gen_reward_cell(size, &snake.body)),
             snake,
             next_cell: None,
-            status: GameStatus::Paused,
+            status: Status::Paused,
             points: 0,
             audio_system,
             is_started: false,
@@ -53,13 +55,13 @@ impl World {
     pub fn start_game(&mut self) {
         self.start_audio();
         self.audio_system.trigger("start", None);
-        self.status = GameStatus::Running;
+        self.status = Status::Running;
         self.is_started = true;
     }
 
     pub fn pause_game(&mut self) {
         self.audio_system.trigger("pause", None);
-        self.status = GameStatus::Paused;
+        self.status = Status::Paused;
     }
 
     pub fn resume_game(&mut self) {
@@ -67,19 +69,18 @@ impl World {
             return self.start_game();
         }
         self.audio_system.trigger("resume", None);
-        self.status = GameStatus::Running;
+        self.status = Status::Running;
     }
 
     pub fn restart(&mut self) {
         self.audio_system.trigger("restart", None);
         self.snake = Snake::new(self.snake_head_index(), 3);
-        self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
-        self.status = GameStatus::Paused;
+        self.reward_cell = Some(World::gen_reward_cell(self.size, &self.snake.body));
+        self.status = Status::Paused;
         self.points = 0;
     }
 
     pub fn start_audio(&mut self) {
-        console::log!("start audio");
         self.audio_system.start();
     }
 
@@ -92,7 +93,7 @@ impl World {
     }
 
     pub fn step(&mut self) {
-        if self.status != GameStatus::Running {
+        if self.status != Status::Running {
             return;
         }
         let temp = self.snake.body.clone();
@@ -102,40 +103,39 @@ impl World {
                 self.next_cell = None;
             }
             None => {
-                self.snake.body[0] = self.gen_next_snake_cell(&self.snake.direction);
+                self.snake.body[0] = self.gen_next_snake_cell(self.snake.direction);
             }
         }
         self.audio_system
-            .trigger("step", Some(self.snake.body[0].0 as f32));
+            .trigger("step", Some(f64_from_usize(self.snake.body[0].0)));
 
         let len = self.snake.body.len();
 
         for i in 1..len {
-            self.snake.body[i] = SnakeCell(temp[i - 1].0);
+            self.snake.body[i] = Cell(temp[i - 1].0);
         }
 
         if self.snake.body[1..len].contains(&self.snake.body[0]) {
             self.audio_system.trigger("lose", None);
-            self.status = GameStatus::Lost
+            self.status = Status::Lost;
         }
 
         if self.reward_cell == Some(self.snake_head_index()) {
             if len < self.size {
                 self.points += 1;
-                self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body);
-                self.audio_system
-                    .trigger("eat", Some(self.snake_body().len() as f32));
+                self.reward_cell = Some(World::gen_reward_cell(self.size, &self.snake.body));
+                self.audio_system.trigger("eat", Some(f64_from_usize(len)));
             } else {
                 self.reward_cell = None;
-                self.status = GameStatus::Won;
+                self.status = Status::Won;
                 self.audio_system.trigger("win", None);
             }
 
-            self.snake.body.push(SnakeCell(self.snake.body[1].0));
+            self.snake.body.push(Cell(self.snake.body[1].0));
         }
     }
 
-    pub fn game_status(&self) -> GameStatus {
+    pub fn game_status(&self) -> Status {
         self.status
     }
 
@@ -144,8 +144,8 @@ impl World {
             return;
         }
         self.audio_system
-            .trigger("direction", Some(direction as u8 as f32));
-        let next_cell = self.gen_next_snake_cell(&direction);
+            .trigger("direction", Some(f64::from(direction as u8)));
+        let next_cell = self.gen_next_snake_cell(direction);
         if self.snake.body[1] == next_cell {
             return;
         }
@@ -158,7 +158,7 @@ impl World {
         self.reward_cell
     }
 
-    fn gen_next_snake_cell(&self, direction: &Direction) -> SnakeCell {
+    fn gen_next_snake_cell(&self, direction: Direction) -> Cell {
         let snake_idx = self.snake_head_index();
         let row = snake_idx / self.width;
 
@@ -166,48 +166,48 @@ impl World {
             Direction::Right => {
                 let treshold = (row + 1) * self.width;
                 if snake_idx + 1 == treshold {
-                    SnakeCell(treshold - self.width)
+                    Cell(treshold - self.width)
                 } else {
-                    SnakeCell(snake_idx + 1)
+                    Cell(snake_idx + 1)
                 }
             }
             Direction::Left => {
                 let treshold = row * self.width;
                 if snake_idx == treshold {
-                    SnakeCell(treshold + (self.width - 1))
+                    Cell(treshold + (self.width - 1))
                 } else {
-                    SnakeCell(snake_idx - 1)
+                    Cell(snake_idx - 1)
                 }
             }
             Direction::Up => {
                 let treshold = snake_idx - (row * self.width);
                 if snake_idx == treshold {
-                    SnakeCell((self.size - self.width) + treshold)
+                    Cell((self.size - self.width) + treshold)
                 } else {
-                    SnakeCell(snake_idx - self.width)
+                    Cell(snake_idx - self.width)
                 }
             }
             Direction::Down => {
                 let treshold = snake_idx + ((self.width - row) * self.width);
                 if snake_idx + self.width == treshold {
-                    SnakeCell(treshold - ((row + 1) * self.width))
+                    Cell(treshold - ((row + 1) * self.width))
                 } else {
-                    SnakeCell(snake_idx + self.width)
+                    Cell(snake_idx + self.width)
                 }
             }
         }
     }
 
-    fn gen_reward_cell(max: usize, snake_body: &[SnakeCell]) -> Option<usize> {
+    fn gen_reward_cell(max: usize, snake_body: &[Cell]) -> usize {
         let mut reward_cell;
         loop {
-            reward_cell = random(0, max);
-            if !snake_body.contains(&SnakeCell(reward_cell)) {
+            reward_cell = random_usize(0, max);
+            if !snake_body.contains(&Cell(reward_cell)) {
                 break;
             }
         }
 
-        Some(reward_cell)
+        reward_cell
     }
 }
 
@@ -227,10 +227,10 @@ fn test_snake() {
 #[test]
 fn test_gen_next_snake_cell() {
     let world = World::new(8, 8, 10);
-    assert_eq!(world.gen_next_snake_cell(&Direction::Right).0, 11);
-    assert_eq!(world.gen_next_snake_cell(&Direction::Left).0, 9);
-    assert_eq!(world.gen_next_snake_cell(&Direction::Up).0, 2);
-    assert_eq!(world.gen_next_snake_cell(&Direction::Down).0, 18);
+    assert_eq!(world.gen_next_snake_cell(Direction::Right).0, 11);
+    assert_eq!(world.gen_next_snake_cell(Direction::Left).0, 9);
+    assert_eq!(world.gen_next_snake_cell(Direction::Up).0, 2);
+    assert_eq!(world.gen_next_snake_cell(Direction::Down).0, 18);
 }
 
 #[test]

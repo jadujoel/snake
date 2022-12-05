@@ -6,4 +6,3 @@ async function main() {
    run_app();
 }
 main()
-

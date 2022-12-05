@@ -1,24 +1,22 @@
 use super::math;
-use crate::utils::{clamp, random};
+use crate::utils::{clamp, random_f32};
 use web_sys::AudioContext;
 
 #[allow(unused)]
-pub fn play_oscillator(context: &AudioContext, frequency: f32, gain: f32) {
+pub fn oscillator(context: &AudioContext, frequency: f32, gain: f32) {
     let now = context.current_time();
     let oscillator = context.create_oscillator().unwrap();
     oscillator.set_type(web_sys::OscillatorType::Square);
     oscillator.frequency().set_value(clamp(
         10.0,
-        frequency + random(0, 800) as f32 - 400.0,
+        frequency + random_f32(0.0, 800.0) - 400.0,
         20000.0,
     ));
     oscillator.start().unwrap();
     oscillator.stop_with_when(now + 0.4);
-    oscillator.frequency().set_value_curve_at_time(
-        &mut [frequency, random(10, 800) as f32],
-        now,
-        0.3,
-    );
+    oscillator
+        .frequency()
+        .set_value_curve_at_time(&mut [frequency, random_f32(10.0, 800.0)], now, 0.3);
 
     let gain_node = context.create_gain().unwrap();
     gain_node.gain().set_value(math::linear_from_decibel(gain));
@@ -32,7 +30,7 @@ pub fn play_oscillator(context: &AudioContext, frequency: f32, gain: f32) {
 }
 
 #[allow(unused)]
-pub fn play_step(context: &AudioContext, frequency: f32, gain: f32) {
+pub fn step(context: &AudioContext, frequency: f32, gain: f32) {
     let now = context.current_time();
     let oscillator = context.create_oscillator().unwrap();
     oscillator.set_type(web_sys::OscillatorType::Sawtooth);
@@ -42,7 +40,7 @@ pub fn play_step(context: &AudioContext, frequency: f32, gain: f32) {
     oscillator.start().unwrap();
     oscillator.stop_with_when(now + 0.4);
     oscillator.frequency().set_value_curve_at_time(
-        &mut [frequency + random(0, 20) as f32, frequency / 2.0],
+        &mut [frequency + random_f32(0.0, 20.0), frequency / 2.0],
         now,
         0.1,
     );
@@ -59,13 +57,15 @@ pub fn play_step(context: &AudioContext, frequency: f32, gain: f32) {
 }
 
 #[allow(unused)]
-pub fn play_direction(context: &AudioContext, frequency: f32, gain: f32) {
+pub fn direction(context: &AudioContext, frequency: f32, gain: f32) {
     let now = context.current_time();
     let oscillator = context.create_oscillator().unwrap();
     oscillator.set_type(web_sys::OscillatorType::Sine);
-    oscillator
-        .frequency()
-        .set_value(clamp(10.0, frequency + random(0, 12) as f32 - 6.0, 20000.0));
+    oscillator.frequency().set_value(clamp(
+        10.0,
+        frequency + random_f32(0.0, 12.0) - 6.0,
+        20000.0,
+    ));
     oscillator.start().unwrap();
     oscillator.stop_with_when(now + 0.4);
     oscillator

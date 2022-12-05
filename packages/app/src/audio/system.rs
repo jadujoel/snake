@@ -1,4 +1,4 @@
-use super::{assets::spawn_load_audio_buffers, engine::AudioEngine};
+use super::{assets::spawn_load_audio_buffers, engine::Engine};
 use web_sys::AudioContext;
 
 pub fn create_audio_context() -> Option<AudioContext> {
@@ -10,12 +10,12 @@ pub fn create_audio_context() -> Option<AudioContext> {
 }
 
 #[derive(Clone)]
-pub struct AudioEngineProvider {
-    pub audio_engine: Option<AudioEngine>,
+pub struct System {
+    pub audio_engine: Option<Engine>,
     pub is_started: bool,
 }
 
-impl AudioEngineProvider {
+impl System {
     pub fn new() -> Self {
         spawn_load_audio_buffers();
         Self {
@@ -24,19 +24,19 @@ impl AudioEngineProvider {
         }
     }
 
-    // use this on user action to create the audio context and initialize engine
-    // pub fn start<'a>(&'a mut self) {
+    /// use this on user action to create the audio context and initialize engine
     pub fn start(&mut self) {
         if self.is_started {
             return;
         }
         if let Some(context) = create_audio_context() {
-            self.audio_engine = Some(AudioEngine::new(context));
+            self.audio_engine = Some(Engine::new(context));
             self.is_started = true;
         }
     }
 
-    pub fn trigger(&mut self, event: &str, val: Option<f32>) {
+    /// use to trigger events that the audio engine can react to
+    pub fn trigger(&mut self, event: &str, val: Option<f64>) {
         if self.is_started {
             match &mut self.audio_engine {
                 Some(audio_engine) => audio_engine.trigger(event, val),
