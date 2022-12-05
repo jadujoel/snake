@@ -1,6 +1,7 @@
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlCanvasElement;
 use yew::{function_component, html, use_node_ref, Properties};
+use crate::utils::{u32_from_usize, f64_from_usize};
 
 #[derive(Clone, PartialEq, Eq, Properties)]
 pub struct Props {
@@ -10,7 +11,6 @@ pub struct Props {
     pub body: Vec<usize>,
 }
 
-#[allow(clippy::cast_possible_truncation, clippy::as_conversions, clippy::cast_precision_loss)]
 #[function_component(SnakeCanvas)]
 pub fn snake_canvas(props: &Props) -> Html {
     // let Props { width, height, reward, body } = props.clone();
@@ -38,9 +38,9 @@ pub fn snake_canvas(props: &Props) -> Html {
         draw_board(&context, width, height, cell_size);
         if let Some(reward) = reward {
             #[allow(clippy::cast_precision_loss)]
-            draw_reward(&context, f64::from(width), f64::from(cell_size), reward as f64);
+            draw_reward(&context, width, cell_size, u32_from_usize(reward));
         }
-        draw_snake(&context, f64::from(width), f64::from(cell_size), &body);
+        draw_snake(&context, width, cell_size, &body);
         // Perform the cleanup
         || {}
     };
@@ -64,22 +64,21 @@ pub fn snake_canvas(props: &Props) -> Html {
 
 fn draw_snake(
     ctx: &web_sys::CanvasRenderingContext2d,
-    width: f64,
-    cell_size: f64,
+    width: u32,
+    cell_size: u32,
     body: &[usize],
 ) {
-    #[allow(clippy::cast_possible_truncation, clippy::as_conversions, clippy::cast_precision_loss, clippy::cast_sign_loss)]
     for (index, cell) in body.iter().enumerate() {
         let color = if index == 0 { "#3b20d5" } else { "#a14393" };
         ctx.set_fill_style(&JsValue::from_str(color));
         let col = cell % width as usize;
         let row = cell / width as usize;
         ctx.begin_path();
-        let x = (col * cell_size as usize) as f64;
-        let y = (row * cell_size as usize) as f64;
-        let w = cell_size - 1.0;
-        let h = cell_size - 1.0;
-        ctx.fill_rect(x, y, w, h);
+        let x = f64_from_usize(col * cell_size as usize);
+        let y = f64_from_usize(row * cell_size as usize);
+        let w = cell_size - 1;
+        let h = cell_size - 1;
+        ctx.fill_rect(x, y, f64::from(w), f64::from(h));
     }
     ctx.stroke();
 }
@@ -113,18 +112,18 @@ fn draw_board(
 
 fn draw_reward(
     ctx: &web_sys::CanvasRenderingContext2d,
-    width: f64,
-    cell_size: f64,
-    reward: f64,
+    width: u32,
+    cell_size: u32,
+    reward: u32,
 ) {
     let col = reward % width;
     let row = reward / width;
     ctx.set_fill_style(&JsValue::from_str("red"));
     ctx.begin_path();
-    let x = (col * cell_size) as f64;
-    let y = (row * cell_size) as f64;
-    let w = cell_size as f64;
-    let h = cell_size as f64;
+    let x = f64::from(col * cell_size);
+    let y = f64::from(row * cell_size);
+    let w = f64::from(cell_size);
+    let h = w;
     ctx.fill_rect(x, y, w, h);
     ctx.stroke();
 }
