@@ -6,14 +6,6 @@
         <meta name="description" content="Snake"/>
         <title>Snake App</title>
         <link rel="stylesheet" href="./app.css"/>
-        <script defer>
-          function preventArrowScroll(event) {
-            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-              event.preventDefault();
-            }
-          }
-          window.addEventListener('keydown', preventArrowScroll, false);
-        </script>
     </head>
     <body>
         <script type="module">import "./app.js";</script>
