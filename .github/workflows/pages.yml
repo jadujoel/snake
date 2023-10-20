@@ -44,10 +44,9 @@ jobs:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'latest'
 
-      - name: Setup Bun Runtime
-        uses: antongolub/action-setup-bun@v1.12.8
+      - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: 0.2.2
+          bun-version: latest
 
       # - name: Setup ffmpeg
       - uses: FedericoCarboni/setup-ffmpeg@v2
